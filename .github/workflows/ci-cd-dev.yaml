@@ -1,0 +1,77 @@
+name: CI/CD - Development
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Check coverage threshold
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          if [ -f coverage/lcov.info ]; then
+            COVERAGE=$(grep -oP 'lines.*: \K[0-9.]+' coverage/lcov.info | head -1 || echo "0")
+            if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+              echo "❌ Cobertura de testes abaixo de 70% (atual: ${COVERAGE}%)"
+              echo "Build bloqueado: cobertura insuficiente"
+              exit 1
+            else
+              echo "✅ Cobertura de testes OK (>= 70%): ${COVERAGE}%"
+            fi
+          else
+            echo "❌ Arquivo de coverage não encontrado"
+            echo "Build bloqueado: testes não executados corretamente"
+            exit 1
+          fi
+
+      - name: Build application
+        run: npm run build:prod
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=dev-
+            type=raw,value=dev-latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+

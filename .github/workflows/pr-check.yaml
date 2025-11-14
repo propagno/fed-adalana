@@ -1,0 +1,202 @@
+name: PR Check - Build and Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - develop
+      - main
+      - staging
+
+jobs:
+  validate:
+    name: Validate PR Requirements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+            build
+          scopes: |
+            api
+            ui
+            config
+            docker
+            ci
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            O título do PR deve começar com letra minúscula e seguir o padrão:
+            tipo(escopo): descrição
+            Exemplo: feat(ui): adiciona componente de usuários
+
+      - name: Check for secrets
+        run: |
+          echo "🔍 Verificando se há secrets no código..."
+          if grep -rE "(password|secret|token|api_key|apikey)\s*=\s*['\"][^'\"]+['\"]" --include="*.ts" --include="*.js" --include="*.json" src/ docker/ 2>/dev/null | grep -v "example" | grep -v "test"; then
+            echo "⚠️  Possíveis secrets encontrados no código!"
+            echo "Por favor, remova secrets e use variáveis de ambiente"
+            exit 1
+          else
+            echo "✅ Nenhum secret encontrado"
+          fi
+
+      - name: Check for .env files
+        run: |
+          echo "🔍 Verificando arquivos .env..."
+          if find . -name ".env*" -not -name ".env.example" | grep -q .; then
+            echo "❌ Arquivos .env encontrados no repositório!"
+            echo "Por favor, remova arquivos .env e use apenas .env.example"
+            exit 1
+          else
+            echo "✅ Nenhum arquivo .env encontrado"
+          fi
+
+      - name: Validate Dockerfile
+        run: |
+          echo "🔍 Validando Dockerfile..."
+          if [ -f "docker/Dockerfile" ]; then
+            if grep -iE "(password|secret|token)" docker/Dockerfile | grep -v "#" | grep -v "ENV"; then
+              echo "⚠️  Possíveis secrets no Dockerfile!"
+              exit 1
+            fi
+            echo "✅ Dockerfile validado"
+          fi
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:ci
+
+      - name: Check coverage threshold
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          if [ -f coverage/lcov.info ]; then
+            COVERAGE=$(grep -oP 'lines.*: \K[0-9.]+' coverage/lcov.info | head -1 || echo "0")
+            if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+              echo "⚠️  Cobertura de testes abaixo de 70% (atual: ${COVERAGE}%)"
+              echo "Por favor, adicione mais testes antes de fazer merge"
+              exit 1
+            else
+              echo "✅ Cobertura de testes OK (>= 70%): ${COVERAGE}%"
+            fi
+          else
+            echo "⚠️  Arquivo de coverage não encontrado"
+            exit 1
+          fi
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [validate, lint, test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build:prod
+
+      - name: Build Docker image (test)
+        run: |
+          docker build -t fed-fale-com-jesus-test:${{ github.sha }} -f docker/Dockerfile .
+
+      - name: Comment PR with results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const validateStatus = '${{ needs.validate.result }}' === 'success' ? '✅' : '❌'
+            const lintStatus = '${{ needs.lint.result }}' === 'success' ? '✅' : '❌'
+            const testStatus = '${{ needs.test.result }}' === 'success' ? '✅' : '❌'
+            const buildStatus = '${{ job.status }}' === 'success' ? '✅' : '❌'
+            
+            const body = `## PR Check - Resultados
+            
+            ### Validações
+            - Validação de título: ${validateStatus}
+            - Verificação de secrets: ${validateStatus}
+            - Verificação de .env: ${validateStatus}
+            - Validação de Dockerfile: ${validateStatus}
+            
+            ### Código
+            - Lint: ${lintStatus}
+            - Testes unitários: ${testStatus}
+            - Coverage >= 70%: ${testStatus}
+            - Build da aplicação: ${buildStatus}
+            
+            ${buildStatus === '✅' && validateStatus === '✅' && lintStatus === '✅' && testStatus === '✅' ? '✅ **Tudo OK! PR pronto para review.**' : '❌ **Por favor, corrija os problemas identificados antes de fazer merge.**'}`
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })

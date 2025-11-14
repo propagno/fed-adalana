@@ -1,0 +1,35 @@
+services:
+  app-dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: fed-fale-com-jesus-dev
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./src:/app/src
+      - ./angular.json:/app/angular.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:4200 || exit 0"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  node_modules:
+    driver: local
+
+networks:
+  dev-network:
+    driver: bridge
+    name: fed-fale-com-jesus-dev-network
+
