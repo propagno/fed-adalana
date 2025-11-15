@@ -21,7 +21,7 @@ describe('HomeComponent', () => {
 
   it('should display welcome message', () => {
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h2')?.textContent).toContain('Bem-vindo ao Fale com Jesus');
+    expect(compiled.querySelector('h2')?.textContent).toContain('Bem-vindo ao Adalana');
   });
 });
 

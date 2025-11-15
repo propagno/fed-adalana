@@ -1,6 +1,6 @@
-# PowerShell setup script for fed-fale-com-jesus
+# PowerShell setup script for fed-adalana
 
-Write-Host "🚀 Configurando fed-fale-com-jesus..." -ForegroundColor Cyan
+Write-Host "🚀 Configurando fed-adalana..." -ForegroundColor Cyan
 
 # Verificar Node.js
 try {

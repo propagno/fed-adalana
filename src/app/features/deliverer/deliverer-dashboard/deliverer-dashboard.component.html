@@ -1,0 +1,109 @@
+<div class="deliverer-dashboard">
+  <header class="dashboard-header">
+    <h1>Minhas Entregas</h1>
+    <div class="date-selector">
+      <label for="delivery-date">Data:</label>
+      <input 
+        type="date" 
+        id="delivery-date" 
+        [(ngModel)]="selectedDate" 
+        (change)="onDateChange()"
+        class="date-input">
+    </div>
+  </header>
+
+  <div *ngIf="summary" class="summary-cards">
+    <div class="summary-card">
+      <h3>Total</h3>
+      <p class="summary-value">{{ summary.total_deliveries }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Pendentes</h3>
+      <p class="summary-value pending">{{ summary.pending_deliveries }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Concluídas</h3>
+      <p class="summary-value completed">{{ summary.completed_deliveries }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Valor Total</h3>
+      <p class="summary-value">{{ summary.total_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Recebido</h3>
+      <p class="summary-value collected">{{ summary.collected_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+    </div>
+    <div class="summary-card">
+      <h3>Pendente</h3>
+      <p class="summary-value pending-amount">{{ summary.pending_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <p>Carregando entregas...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error" class="deliveries-list">
+    <div *ngIf="deliveries.length === 0" class="no-deliveries">
+      <p>Nenhuma entrega agendada para esta data.</p>
+    </div>
+
+    <div *ngFor="let delivery of deliveries" class="delivery-card" (click)="viewDelivery(delivery)">
+      <div class="delivery-header">
+        <h3>{{ delivery.customer_name }}</h3>
+        <span class="status-badge" [ngClass]="getStatusClass(delivery.status)">
+          {{ delivery.status }}
+        </span>
+      </div>
+
+      <div class="delivery-info">
+        <p class="address">
+          <strong>Endereço:</strong> {{ delivery.customer_address }}
+        </p>
+        <p class="phone">
+          <strong>Telefone:</strong> {{ delivery.customer_phone }}
+        </p>
+        <p class="amount">
+          <strong>Valor:</strong> {{ delivery.total_amount | currency:delivery.currency:'symbol':'1.2-2' }}
+        </p>
+        <p class="payment-status" [ngClass]="getPaymentStatusClass(delivery.payment_status)">
+          <strong>Pagamento:</strong> {{ delivery.payment_status }}
+        </p>
+      </div>
+
+      <div class="delivery-items">
+        <h4>Itens:</h4>
+        <ul>
+          <li *ngFor="let item of delivery.items">
+            {{ item.product_name }} - Qtd: {{ item.quantity }} - 
+            {{ item.total_price | currency:delivery.currency:'symbol':'1.2-2' }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="delivery-actions">
+        <button 
+          *ngIf="delivery.whatsapp_link"
+          class="btn btn-whatsapp" 
+          (click)="openWhatsApp(delivery.whatsapp_link); $event.stopPropagation()">
+          WhatsApp
+        </button>
+        <button 
+          *ngIf="delivery.maps_link"
+          class="btn btn-maps" 
+          (click)="openMaps(delivery.maps_link); $event.stopPropagation()">
+          Navegar
+        </button>
+        <button 
+          class="btn btn-primary" 
+          (click)="viewDelivery(delivery); $event.stopPropagation()">
+          Ver Detalhes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

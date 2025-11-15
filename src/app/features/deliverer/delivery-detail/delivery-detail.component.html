@@ -1,0 +1,129 @@
+<div class="delivery-detail">
+  <button class="btn-back" (click)="goBack()">← Voltar</button>
+
+  <div *ngIf="loading" class="loading">
+    <p>Carregando detalhes...</p>
+  </div>
+
+  <div *ngIf="error" class="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div *ngIf="delivery && !loading" class="delivery-content">
+    <header class="detail-header">
+      <h1>{{ delivery.customer_name }}</h1>
+      <span class="status-badge" [ngClass]="getStatusClass(delivery.status)">
+        {{ delivery.status }}
+      </span>
+    </header>
+
+    <div class="detail-section">
+      <h2>Informações do Cliente</h2>
+      <div class="info-grid">
+        <div class="info-item">
+          <strong>Nome:</strong> {{ delivery.customer_name }}
+        </div>
+        <div class="info-item">
+          <strong>Telefone:</strong> 
+          <a [href]="'tel:' + delivery.customer_phone">{{ delivery.customer_phone }}</a>
+        </div>
+        <div class="info-item full-width">
+          <strong>Endereço:</strong> {{ delivery.customer_address }}
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h2>Itens da Entrega</h2>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th>Quantidade</th>
+            <th>Preço Unit.</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of delivery.items">
+            <td>{{ item.product_name }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ item.unit_price | currency:delivery.currency:'symbol':'1.2-2' }}</td>
+            <td>{{ item.total_price | currency:delivery.currency:'symbol':'1.2-2' }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3"><strong>Total:</strong></td>
+            <td><strong>{{ delivery.total_amount | currency:delivery.currency:'symbol':'1.2-2' }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="detail-section">
+      <h2>Status do Pagamento</h2>
+      <p class="payment-status" [ngClass]="getPaymentStatusClass(delivery.payment_status)">
+        {{ delivery.payment_status }}
+      </p>
+    </div>
+
+    <div class="detail-actions">
+      <button class="btn btn-whatsapp" (click)="openWhatsApp()">
+        📱 WhatsApp
+      </button>
+      <button class="btn btn-maps" (click)="openMaps()">
+        🗺️ Navegar
+      </button>
+      <button 
+        *ngIf="delivery.status !== 'delivered' && delivery.status !== 'failed'"
+        class="btn btn-success" 
+        (click)="markAsDelivered()"
+        [disabled]="actionLoading">
+        ✓ Marcar como Entregue
+      </button>
+      <button 
+        *ngIf="delivery.status === 'delivered' && delivery.payment_status !== 'paid'"
+        class="btn btn-payment" 
+        (click)="recordPayment()">
+        💰 Registrar Pagamento
+      </button>
+    </div>
+
+    <div *ngIf="delivery.status !== 'delivered' && delivery.status !== 'failed'" class="detail-section">
+      <h2>Marcar como Entregue</h2>
+      <div class="form-group">
+        <label for="delivery-notes">Observações:</label>
+        <textarea 
+          id="delivery-notes" 
+          [(ngModel)]="deliveryNotes" 
+          rows="3"
+          placeholder="Observações sobre a entrega..."></textarea>
+      </div>
+    </div>
+
+    <div *ngIf="delivery.status !== 'delivered' && delivery.status !== 'failed'" class="detail-section">
+      <h2>Marcar como Falha</h2>
+      <div class="form-group">
+        <label for="failure-reason">Motivo da Falha:</label>
+        <select id="failure-reason" [(ngModel)]="failureReason">
+          <option value="customer_absent">Cliente Ausente</option>
+          <option value="address_issue">Problema com Endereço</option>
+          <option value="refused">Cliente Recusou</option>
+          <option value="other">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="failure-notes">Observações:</label>
+        <textarea 
+          id="failure-notes" 
+          [(ngModel)]="failureNotes" 
+          rows="3"
+          placeholder="Detalhes sobre a falha..."></textarea>
+      </div>
+      <button class="btn btn-danger" (click)="markAsFailed()" [disabled]="actionLoading">
+        ✗ Marcar como Falha
+      </button>
+    </div>
+  </div>
+</div>

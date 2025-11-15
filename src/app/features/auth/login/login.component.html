@@ -1,0 +1,171 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-dark to-primary-light px-4 py-12">
+  <div class="w-full max-w-md">
+    <!-- Logo/Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-white mb-2">Adalana</h1>
+      <p class="text-primary-light text-lg">Sistema de Gestão de Entregas</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-surface rounded-2xl shadow-2xl overflow-hidden">
+      <!-- Tabs -->
+      <div class="flex border-b border-gray-200">
+        <button
+          (click)="setActiveTab('login')"
+          [class]="activeTab === 'login' 
+            ? 'flex-1 py-4 px-6 text-center font-medium text-primary border-b-2 border-primary bg-primary/5' 
+            : 'flex-1 py-4 px-6 text-center font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors'">
+          Entrar
+        </button>
+        <button
+          (click)="setActiveTab('register')"
+          [class]="activeTab === 'register' 
+            ? 'flex-1 py-4 px-6 text-center font-medium text-primary border-b-2 border-primary bg-primary/5' 
+            : 'flex-1 py-4 px-6 text-center font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors'">
+          Criar Conta
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-8">
+        <!-- Error Message -->
+        <div *ngIf="error" class="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
+          {{ error }}
+        </div>
+
+        <!-- Success Message -->
+        <div *ngIf="successMessage" class="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg text-success text-sm">
+          {{ successMessage }}
+        </div>
+
+        <!-- Login Form -->
+        <form *ngIf="activeTab === 'login'" (ngSubmit)="onSubmitLogin()" class="space-y-6">
+          <div>
+            <label for="login-email" class="label">Email</label>
+            <input
+              type="email"
+              id="login-email"
+              [(ngModel)]="email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="seu@email.com"
+              class="input">
+          </div>
+
+          <div>
+            <label for="login-password" class="label">Senha</label>
+            <input
+              type="password"
+              id="login-password"
+              [(ngModel)]="password"
+              name="password"
+              required
+              autocomplete="current-password"
+              placeholder="••••••••"
+              class="input">
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading"
+            class="btn-primary w-full">
+            <span *ngIf="!loading">Entrar</span>
+            <span *ngIf="loading" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Entrando...
+            </span>
+          </button>
+        </form>
+
+        <!-- Register Form -->
+        <form *ngIf="activeTab === 'register'" (ngSubmit)="onSubmitRegister()" class="space-y-6">
+          <div>
+            <label for="register-name" class="label">Nome Completo *</label>
+            <input
+              type="text"
+              id="register-name"
+              [(ngModel)]="registerData.name"
+              name="name"
+              required
+              placeholder="Seu nome completo"
+              class="input">
+          </div>
+
+          <div>
+            <label for="register-email" class="label">Email *</label>
+            <input
+              type="email"
+              id="register-email"
+              [(ngModel)]="registerData.email"
+              name="email"
+              required
+              autocomplete="email"
+              placeholder="seu@email.com"
+              class="input">
+          </div>
+
+          <div>
+            <label for="register-phone" class="label">Telefone</label>
+            <input
+              type="tel"
+              id="register-phone"
+              [(ngModel)]="registerData.phone"
+              name="phone"
+              placeholder="(00) 00000-0000"
+              class="input">
+          </div>
+
+          <div>
+            <label for="register-password" class="label">Senha *</label>
+            <input
+              type="password"
+              id="register-password"
+              [(ngModel)]="registerData.password"
+              name="password"
+              required
+              autocomplete="new-password"
+              placeholder="Mínimo 6 caracteres"
+              minlength="6"
+              class="input">
+            <p class="mt-1 text-xs text-gray-500">A senha deve ter no mínimo 6 caracteres</p>
+          </div>
+
+          <div>
+            <label for="register-confirm-password" class="label">Confirmar Senha *</label>
+            <input
+              type="password"
+              id="register-confirm-password"
+              [(ngModel)]="confirmPassword"
+              name="confirmPassword"
+              required
+              placeholder="Digite a senha novamente"
+              class="input">
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading"
+            class="btn-primary w-full">
+            <span *ngIf="!loading">Criar Conta</span>
+            <span *ngIf="loading" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Criando conta...
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="mt-6 text-center text-white/80 text-sm">
+      Ao continuar, você concorda com nossos termos de uso e política de privacidade
+    </p>
+  </div>
+</div>

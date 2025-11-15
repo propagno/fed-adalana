@@ -19,7 +19,7 @@ RUN npm run build:prod
 FROM nginx:alpine
 
 # Copy built files from builder
-COPY --from=builder /app/dist/fed-fale-com-jesus/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/fed-adalana/browser /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf

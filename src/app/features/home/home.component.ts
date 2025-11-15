@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="home-container">
-      <h2>Bem-vindo ao Fale com Jesus</h2>
+      <h2>Bem-vindo ao Adalana</h2>
       <p>Esta é a aplicação frontend base desenvolvida com Angular 17+.</p>
       <div class="info-card">
         <h3>Status da Aplicação</h3>

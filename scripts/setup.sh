@@ -2,7 +2,7 @@
 
 set -e
 
-echo "🚀 Configurando fed-fale-com-jesus..."
+echo "🚀 Configurando fed-adalana..."
 
 # Verificar Node.js
 if ! command -v node &> /dev/null; then

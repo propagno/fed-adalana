@@ -1,6 +1,6 @@
-# 🎨 fed-fale-com-jesus
+# 🎨 fed-adalana
 
-Frontend base desenvolvido com Angular 17+, TypeScript e integrado com as pipelines de infraestrutura.
+Frontend Angular para Adalana - Sistema de gestão de assinaturas e entregas desenvolvido com Angular 17+ e TypeScript.
 
 ## 📋 Tecnologias
 
@@ -32,8 +32,8 @@ O script irá:
 
 1. **Clone e configure:**
 ```bash
-git clone git@github.com:propagno/fed-fale-com-jesus.git
-cd fed-fale-com-jesus
+git clone git@github.com:propagno/fed-adalana.git
+cd fed-adalana
 cp .env.example .env.dev
 # Edite .env.dev com suas configurações
 ```
@@ -60,7 +60,7 @@ docker-compose -f docker-compose.dev.yml up -d
 ## 🏗️ Estrutura do Projeto
 
 ```
-fed-fale-com-jesus/
+fed-adalana/
 ├── src/
 │   ├── app/
 │   │   ├── features/          # Features da aplicação

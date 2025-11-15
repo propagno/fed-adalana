@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.test
-    container_name: fed-fale-com-jesus-test
+    container_name: fed-adalana-test
     volumes:
       - ./coverage:/app/coverage
     environment:

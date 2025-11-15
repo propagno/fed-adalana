@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "fed-fale-com-jesus": {
+    "fed-adalana": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -24,7 +24,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/fed-fale-com-jesus",
+            "outputPath": "dist/fed-adalana",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -80,10 +80,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "fed-fale-com-jesus:build:production"
+              "buildTarget": "fed-adalana:build:production"
             },
             "development": {
-              "buildTarget": "fed-fale-com-jesus:build:development"
+              "buildTarget": "fed-adalana:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -91,7 +91,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "fed-fale-com-jesus:build"
+            "buildTarget": "fed-adalana:build"
           }
         },
         "test": {

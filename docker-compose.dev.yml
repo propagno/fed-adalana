@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.dev
-    container_name: fed-fale-com-jesus-dev
+    container_name: fed-adalana-dev
     ports:
       - "4200:4200"
     volumes:
@@ -31,5 +31,5 @@ volumes:
 networks:
   dev-network:
     driver: bridge
-    name: fed-fale-com-jesus-dev-network
+    name: fed-adalana-dev-network
 
