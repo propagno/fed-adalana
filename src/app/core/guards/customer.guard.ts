@@ -32,12 +32,8 @@ export const customerGuard: CanActivateFn = (route, state) => {
     return false;
   }
 
-  // CUSTOMER must have accountId (they belong to an account/company)
-  if (user.accountId === null) {
-    router.navigate(['/login']);
-    return false;
-  }
-
+  // CUSTOMER users can have accountId as null because they can shop from multiple accounts
+  // The accountId in the token is optional for CUSTOMER role
   return true;
 };
 

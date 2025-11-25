@@ -38,11 +38,28 @@ export interface UserInfo {
   name?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  account_id: string | null;
+  email: string;
+  name: string;
+  role: string;
+  phone: string | null;
+  active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface RegisterCustomerRequest {
   name: string;
   email: string;
   password: string;
   phone?: string;
+}
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
 }
 
 @Injectable({
@@ -156,6 +173,10 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  getCurrentUserProfile(): Observable<UserProfile> {
+    return this.apiService.get<UserProfile>('/auth/me');
+  }
+
   hasRole(role: string): boolean {
     const user = this.currentUserSubject.value;
     return user?.role.toLowerCase() === role.toLowerCase();
@@ -196,6 +217,65 @@ export class AuthService {
     });
   }
 
+  verifyEmail(token: string): Observable<any> {
+    return this.apiService.post('/auth/verify-email', null, { token });
+  }
+
+  resendVerification(email: string): Observable<any> {
+    return this.apiService.post('/auth/resend-verification', { email });
+  }
+
+  forgotPassword(email: string): Observable<any> {
+    return this.apiService.post('/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.apiService.post('/auth/reset-password', { token, newPassword });
+  }
+
+  changePassword(currentPassword: string, newPassword: string): Observable<void> {
+    const request: ChangePasswordRequest = {
+      current_password: currentPassword,
+      new_password: newPassword
+    };
+    
+    return new Observable(observer => {
+      this.apiService.post<void>('/auth/change-password', request).subscribe({
+        next: () => {
+          observer.next();
+          observer.complete();
+        },
+        error: (error) => {
+          observer.error(error);
+        }
+      });
+    });
+  }
+
+  /**
+   * Redirects user to appropriate dashboard based on role
+   */
+  redirectByRole(role: string): void {
+    switch(role) {
+      case 'customer':
+        this.router.navigate(['/catalog']);
+        break;
+      case 'admin':
+      case 'operator':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'deliverer':
+        this.router.navigate(['/deliverer']);
+        break;
+      case 'super_admin':
+        this.router.navigate(['/super-admin/dashboard']);
+        break;
+      default:
+        this.router.navigate(['/']);
+        break;
+    }
+  }
+
   private setAuthData(response: AuthResponse): void {
     localStorage.setItem('access_token', response.access_token);
     localStorage.setItem('refresh_token', response.refresh_token);
@@ -205,7 +285,7 @@ export class AuthService {
     
     const userInfo: UserInfo = {
       id: response.user_id,
-      accountId: response.account_id,
+      accountId: response.account_id || null, // Explicitly handle null
       email: response.email,
       role: response.role,
       name: tokenPayload?.name || undefined

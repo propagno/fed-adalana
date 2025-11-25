@@ -1,0 +1,251 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <app-page-header
+    title="Promoções"
+    description="Gerencie as promoções e descontos da sua empresa"
+    actionLabel="+ Nova Promoção"
+    (action)="showCreateForm = true">
+  </app-page-header>
+
+  <app-data-list
+    [items]="promotions"
+    [loading]="loading"
+    [showFilters]="false"
+    [showSearch]="false"
+    emptyTitle="Nenhuma promoção cadastrada"
+    emptyMessage="Crie sua primeira promoção para atrair mais clientes."
+    emptyActionLabel="+ Nova Promoção"
+    (emptyAction)="showCreateForm = true">
+    
+    <!-- Table Template -->
+    <ng-template #tableTemplate let-promotions>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desconto</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Período</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let promotion of promotions" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="font-mono text-sm font-semibold text-primary">{{ promotion.code }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900">{{ promotion.name }}</div>
+              <div *ngIf="promotion.description" class="text-xs text-gray-500 truncate max-w-xs">{{ promotion.description }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm text-gray-900 font-medium">
+                {{ promotion.discount_type === 'PERCENTAGE' ? promotion.discount_value + '%' : 'R$ ' + promotion.discount_value.toFixed(2) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ formatDate(promotion.start_date) }} - {{ formatDate(promotion.end_date) }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <app-badge 
+                [variant]="promotion.active ? 'success' : 'error'"
+                [label]="promotion.active ? 'Ativa' : 'Inativa'">
+              </app-badge>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button (click)="togglePromotionStatus(promotion)" 
+                      [class]="promotion.active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
+                      class="transition-colors">
+                {{ promotion.active ? 'Desativar' : 'Ativar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
+
+    <!-- Card Template (Mobile) -->
+    <ng-template #cardTemplate let-promotion>
+      <app-card variant="default" [elevation]="1" padding="md">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-sm font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">{{ promotion.code }}</span>
+              <h3 class="text-lg font-medium text-gray-900">{{ promotion.name }}</h3>
+            </div>
+            <p class="text-sm text-gray-500 mt-1">{{ formatDate(promotion.start_date) }} - {{ formatDate(promotion.end_date) }}</p>
+          </div>
+          <app-badge 
+              [variant]="promotion.active ? 'success' : 'error'"
+              [label]="promotion.active ? 'Ativa' : 'Inativa'">
+          </app-badge>
+        </div>
+        
+        <div class="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+          <div>
+            <p class="text-xs text-gray-500 uppercase">Desconto</p>
+            <p class="text-lg font-bold text-gray-900">
+              {{ promotion.discount_type === 'PERCENTAGE' ? promotion.discount_value + '%' : 'R$ ' + promotion.discount_value.toFixed(2) }}
+            </p>
+          </div>
+          <button (click)="togglePromotionStatus(promotion)" 
+                  [class]="promotion.active ? 'text-red-600' : 'text-green-600'"
+                  class="text-sm font-medium">
+            {{ promotion.active ? 'Desativar' : 'Ativar' }}
+          </button>
+        </div>
+      </app-card>
+    </ng-template>
+  </app-data-list>
+
+  <!-- Create Modal -->
+  <app-modal
+    [isOpen]="showCreateForm"
+    title="Nova Promoção"
+    confirmLabel="Salvar Promoção"
+    cancelLabel="Cancelar"
+    [loading]="saving"
+    (confirmed)="savePromotion()"
+    (cancelled)="cancelForm()"
+    (closed)="cancelForm()">
+    
+    <form (ngSubmit)="savePromotion()" #promotionForm="ngForm" class="space-y-4 max-h-[60vh] overflow-y-auto px-1">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Código *</label>
+          <input [(ngModel)]="promotionFormData.code" name="code" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary uppercase"
+                 placeholder="Ex: DESCONTO10" pattern="^[A-Z0-9-_]+$"
+                 (input)="promotionFormData.code = promotionFormData.code.toUpperCase()">
+          <p class="text-xs text-gray-500 mt-1">Apenas letras maiúsculas, números, hífen e underscore</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+          <input [(ngModel)]="promotionFormData.name" name="name" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+          <textarea [(ngModel)]="promotionFormData.description" name="description" rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+          <select [(ngModel)]="promotionFormData.discount_type" name="discount_type" required 
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"
+                  (change)="onDiscountTypeChange()">
+            <option value="PERCENTAGE">Percentual (%)</option>
+            <option value="FIXED">Valor Fixo (R$)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor *</label>
+          <input type="number" [(ngModel)]="promotionFormData.discount_value" name="discount_value" 
+                 required min="0.01" step="0.01" 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Início *</label>
+          <input type="date" [(ngModel)]="promotionFormData.start_date" name="start_date" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Término *</label>
+          <input type="date" [(ngModel)]="promotionFormData.end_date" name="end_date" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Valor Mínimo (R$)</label>
+          <input type="number" [(ngModel)]="minPurchaseAmount" name="minPurchaseAmount" 
+                 min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                 (input)="updateMinPurchaseAmount()">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Máximo de Usos</label>
+          <input type="number" [(ngModel)]="maxUses" name="maxUses" 
+                 min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md" 
+                 (input)="updateMaxUses()"
+                 placeholder="Deixe vazio para ilimitado">
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Promoção</label>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" [(ngModel)]="promotionType" name="promotionType" value="general" 
+                     (change)="onPromotionTypeChange()" class="mr-2 text-primary focus:ring-primary">
+              <span>Geral</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" [(ngModel)]="promotionType" name="promotionType" value="product" 
+                     (change)="onPromotionTypeChange()" class="mr-2 text-primary focus:ring-primary">
+              <span>Produto Específico</span>
+            </label>
+            <label class="flex items-center cursor-pointer">
+              <input type="radio" [(ngModel)]="promotionType" name="promotionType" value="combo" 
+                     (change)="onPromotionTypeChange()" class="mr-2 text-primary focus:ring-primary">
+              <span>Combo</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Product Selection -->
+        <div *ngIf="promotionType === 'product'" class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Produtos</label>
+          <select [(ngModel)]="selectedProductIds" name="selectedProductIds" 
+                  multiple class="w-full px-3 py-2 border border-gray-300 rounded-md" size="5">
+            <option *ngFor="let product of products" [value]="product.id">
+              {{ product.name }} - {{ formatCurrency(product.price_cents || 0) }}
+            </option>
+          </select>
+          <p class="text-xs text-gray-500 mt-1">Segure Ctrl/Cmd para selecionar múltiplos</p>
+        </div>
+
+        <!-- Combo Configuration -->
+        <div *ngIf="promotionType === 'combo'" class="md:col-span-2 space-y-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Combo *</label>
+            <input [(ngModel)]="comboFormData.combo_name" name="combo_name" required 
+                   class="w-full px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Preço do Combo (R$) *</label>
+            <input type="number" [(ngModel)]="comboPrice" name="combo_price" 
+                   required min="0" step="0.01" class="w-full px-3 py-2 border border-gray-300 rounded-md"
+                   (input)="updateComboPrice()">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Itens do Combo</label>
+            <div class="space-y-2">
+              <div *ngFor="let item of comboFormData.items; let i = index" class="flex gap-2 items-end">
+                <div class="flex-1">
+                  <select [(ngModel)]="item.product_id" name="combo_product_{{i}}" required 
+                          class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="">Selecione um produto</option>
+                    <option *ngFor="let product of products" [value]="product.id">
+                      {{ product.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="w-24">
+                  <input type="number" [(ngModel)]="item.quantity" name="combo_quantity_{{i}}" 
+                         required min="1" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Qtd">
+                </div>
+                <button type="button" (click)="removeComboItem(i)" 
+                        class="text-red-600 hover:text-red-800 px-2 py-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              </div>
+              <button type="button" (click)="addComboItem()" 
+                      class="text-sm font-medium text-primary hover:text-primary-dark flex items-center gap-1">
+                <span>+ Adicionar Item</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </app-modal>
+</div>
+

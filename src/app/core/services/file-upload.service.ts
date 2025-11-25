@@ -78,5 +78,30 @@ export class FileUploadService {
       reader.readAsDataURL(file);
     });
   }
+
+  /**
+   * Constrói URL completa para um arquivo servido pelo backend
+   * @param type Tipo do arquivo (account, product, etc.)
+   * @param filename Nome do arquivo
+   * @returns URL completa do arquivo
+   */
+  getFileUrl(type: string, filename: string): string {
+    if (!filename) {
+      return '';
+    }
+    
+    // Se já é uma URL completa, retorna como está
+    if (filename.startsWith('http://') || filename.startsWith('https://')) {
+      return filename;
+    }
+    
+    // Se já começa com /api/files/, retorna com baseUrl
+    if (filename.startsWith('/api/files/')) {
+      return `${this.baseUrl}${filename}`;
+    }
+    
+    // Constrói URL completa
+    return `${this.baseUrl}/api/files/${type}/${filename}`;
+  }
 }
 

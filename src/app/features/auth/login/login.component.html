@@ -1,171 +1,279 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary via-primary-dark to-primary-light px-4 py-12">
-  <div class="w-full max-w-md">
-    <!-- Logo/Title -->
-    <div class="text-center mb-8">
-      <h1 class="text-4xl font-bold text-white mb-2">Adalana</h1>
-      <p class="text-primary-light text-lg">Sistema de Gestão de Entregas</p>
-    </div>
+<div class="min-h-screen bg-background flex">
+  
+  <!-- Left Side - Branding (Hidden on Mobile/Tablet, Visible on Desktop) -->
+  <div class="hidden lg:flex lg:w-1/2 xl:w-7/12 bg-primary relative overflow-hidden items-center justify-center">
+    <!-- Background Pattern -->
+    <div class="absolute inset-0 bg-gradient-to-br from-primary via-primary-light to-primary opacity-90"></div>
+    <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 32px 32px;"></div>
+    
+    <!-- Decorative Elements -->
+    <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-secondary/20 blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-accent/20 blur-3xl"></div>
 
-    <!-- Card -->
-    <div class="bg-surface rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Content -->
+    <div class="relative z-10 text-center px-12 max-w-2xl">
+      <div class="flex items-center justify-center gap-3 mb-8">
+        <div class="relative">
+          <span class="text-8xl font-display font-bold text-white">A</span>
+        </div>
+        <div class="flex items-baseline gap-1">
+          <span class="text-8xl font-display font-bold text-white">dalan</span>
+          <span class="text-8xl font-display font-bold text-secondary">A</span>
+        </div>
+      </div>
+      <h1 class="text-4xl font-display font-bold text-white mb-6">
+        Gestão de Entregas Simplificada
+      </h1>
+      <p class="text-xl text-white/90 leading-relaxed">
+        Otimize sua logística, acompanhe pedidos em tempo real e ofereça a melhor experiência para seus clientes com a plataforma líder de mercado.
+      </p>
+
+      <!-- Feature Highlights -->
+      <div class="mt-12 grid grid-cols-2 gap-8 text-left">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-white mb-1">Entrega Rápida</h3>
+            <p class="text-sm text-white/70">Otimização de rotas para entregas mais eficientes.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-white mb-1">Tempo Real</h3>
+            <p class="text-sm text-white/70">Acompanhamento de status e notificações instantâneas.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Side - Login Form -->
+  <div class="w-full lg:w-1/2 xl:w-5/12 flex items-center justify-center p-4 sm:p-8 lg:p-12 xl:p-16 bg-white">
+    <div class="w-full max-w-md">
+      <!-- Mobile Logo (Visible only on Mobile/Tablet) -->
+      <div class="lg:hidden text-center mb-8">
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <div class="relative">
+            <span class="text-5xl font-display font-bold text-primary">A</span>
+          </div>
+          <div class="flex items-baseline gap-0.5">
+            <span class="text-5xl font-display font-bold text-gray-900">dalan</span>
+            <span class="text-5xl font-display font-bold text-secondary">A</span>
+          </div>
+        </div>
+        <p class="text-gray-600 font-medium">Sistema de Gestão de Entregas</p>
+      </div>
+
+      <!-- Desktop Header -->
+      <div class="hidden lg:block mb-10">
+        <h2 class="text-3xl font-display font-bold text-gray-900 mb-2">Bem-vindo de volta!</h2>
+        <p class="text-gray-600">Por favor, insira seus dados para acessar sua conta.</p>
+      </div>
+
       <!-- Tabs -->
-      <div class="flex border-b border-gray-200">
+      <div class="flex p-1 bg-gray-100 rounded-xl mb-8">
         <button
           (click)="setActiveTab('login')"
           [class]="activeTab === 'login' 
-            ? 'flex-1 py-4 px-6 text-center font-medium text-primary border-b-2 border-primary bg-primary/5' 
-            : 'flex-1 py-4 px-6 text-center font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors'">
+            ? 'flex-1 py-2.5 px-4 text-sm font-semibold text-primary bg-white shadow-sm rounded-lg transition-all' 
+            : 'flex-1 py-2.5 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition-all'">
           Entrar
         </button>
         <button
           (click)="setActiveTab('register')"
           [class]="activeTab === 'register' 
-            ? 'flex-1 py-4 px-6 text-center font-medium text-primary border-b-2 border-primary bg-primary/5' 
-            : 'flex-1 py-4 px-6 text-center font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors'">
+            ? 'flex-1 py-2.5 px-4 text-sm font-semibold text-primary bg-white shadow-sm rounded-lg transition-all' 
+            : 'flex-1 py-2.5 px-4 text-sm font-medium text-gray-600 hover:text-gray-900 transition-all'">
           Criar Conta
         </button>
       </div>
 
-      <!-- Content -->
-      <div class="p-8">
-        <!-- Error Message -->
-        <div *ngIf="error" class="mb-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
-          {{ error }}
-        </div>
-
-        <!-- Success Message -->
-        <div *ngIf="successMessage" class="mb-4 p-3 bg-success/10 border border-success/20 rounded-lg text-success text-sm">
-          {{ successMessage }}
-        </div>
-
-        <!-- Login Form -->
-        <form *ngIf="activeTab === 'login'" (ngSubmit)="onSubmitLogin()" class="space-y-6">
-          <div>
-            <label for="login-email" class="label">Email</label>
-            <input
-              type="email"
-              id="login-email"
-              [(ngModel)]="email"
-              name="email"
-              required
-              autocomplete="email"
-              placeholder="seu@email.com"
-              class="input">
+      <!-- Email Não Verificado -->
+      <app-card *ngIf="emailNotVerified && activeTab === 'login'" variant="highlighted" [elevation]="0" padding="md" customClass="mb-6 border-l-4 border-warning bg-warning/5">
+        <div class="space-y-4">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-warning flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-warning mb-1">Email não verificado</p>
+              <p class="text-sm text-warning/80">{{ error }}</p>
+            </div>
           </div>
+          <div class="pt-2 border-t border-warning/20">
+            <p class="text-xs text-warning/70 mb-3">Não recebeu o email? Verifique sua caixa de spam ou solicite um novo email de verificação.</p>
+            <app-button
+              variant="outline"
+              size="sm"
+              [loading]="resendingVerification"
+              [disabled]="resendingVerification || !email"
+              (click)="resendVerificationEmail()"
+              [fullWidth]="true">
+              {{ resendingVerification ? 'Enviando...' : 'Reenviar Email de Verificação' }}
+            </app-button>
+          </div>
+        </div>
+      </app-card>
 
-          <div>
-            <label for="login-password" class="label">Senha</label>
-            <input
+      <!-- Messages -->
+      <app-card *ngIf="error && !emailNotVerified" variant="highlighted" [elevation]="0" padding="md" customClass="mb-6 border-l-4 border-error bg-error/5">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-error flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-sm text-error flex-1">{{ error }}</p>
+        </div>
+      </app-card>
+
+      <app-card *ngIf="successMessage" variant="highlighted" [elevation]="0" padding="md" customClass="mb-6 border-l-4 border-success bg-success/5">
+        <div class="space-y-3">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-success flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-success mb-1">{{ successMessage }}</p>
+              <p *ngIf="activeTab === 'register'" class="text-xs text-success/80 mt-2">
+                Enviamos um email de verificação para <strong>{{ registerData.email }}</strong>. 
+                Clique no link do email para ativar sua conta e poder fazer login.
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Forms -->
+      <div class="space-y-6">
+        <!-- Login Form -->
+        <form *ngIf="activeTab === 'login'" (ngSubmit)="onSubmitLogin()" class="space-y-5">
+          <app-input
+            label="Email"
+            inputId="login-email"
+            type="email"
+            [(ngModel)]="email"
+            name="email"
+            [required]="true"
+            autocomplete="email"
+            placeholder="seu@email.com"
+            [errorMessage]="error && activeTab === 'login' ? error : undefined">
+          </app-input>
+
+          <div class="space-y-1">
+            <app-input
+              label="Senha"
+              inputId="login-password"
               type="password"
-              id="login-password"
               [(ngModel)]="password"
               name="password"
-              required
+              [required]="true"
               autocomplete="current-password"
               placeholder="••••••••"
-              class="input">
+              [errorMessage]="error && activeTab === 'login' ? error : undefined">
+            </app-input>
+            <div class="flex justify-end">
+              <a routerLink="/auth/forgot-password" class="text-sm font-medium text-primary hover:text-primary-dark">Esqueceu a senha?</a>
+            </div>
           </div>
 
-          <button
+          <app-button
             type="submit"
+            variant="primary"
+            size="lg"
+            label="Entrar"
+            [loading]="loading"
             [disabled]="loading"
-            class="btn-primary w-full">
-            <span *ngIf="!loading">Entrar</span>
-            <span *ngIf="loading" class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Entrando...
-            </span>
-          </button>
+            [fullWidth]="true">
+          </app-button>
         </form>
 
         <!-- Register Form -->
-        <form *ngIf="activeTab === 'register'" (ngSubmit)="onSubmitRegister()" class="space-y-6">
-          <div>
-            <label for="register-name" class="label">Nome Completo *</label>
-            <input
-              type="text"
-              id="register-name"
-              [(ngModel)]="registerData.name"
-              name="name"
-              required
-              placeholder="Seu nome completo"
-              class="input">
-          </div>
+        <form *ngIf="activeTab === 'register'" (ngSubmit)="onSubmitRegister()" class="space-y-5">
+          <app-input
+            label="Nome Completo"
+            inputId="register-name"
+            type="text"
+            [(ngModel)]="registerData.name"
+            name="name"
+            [required]="true"
+            placeholder="Seu nome completo"
+            [errorMessage]="error && activeTab === 'register' ? error : undefined">
+          </app-input>
 
-          <div>
-            <label for="register-email" class="label">Email *</label>
-            <input
-              type="email"
-              id="register-email"
-              [(ngModel)]="registerData.email"
-              name="email"
-              required
-              autocomplete="email"
-              placeholder="seu@email.com"
-              class="input">
-          </div>
+          <app-input
+            label="Email"
+            inputId="register-email"
+            type="email"
+            [(ngModel)]="registerData.email"
+            name="email"
+            [required]="true"
+            autocomplete="email"
+            placeholder="seu@email.com"
+            [errorMessage]="error && activeTab === 'register' ? error : undefined">
+          </app-input>
 
-          <div>
-            <label for="register-phone" class="label">Telefone</label>
-            <input
-              type="tel"
-              id="register-phone"
-              [(ngModel)]="registerData.phone"
-              name="phone"
-              placeholder="(00) 00000-0000"
-              class="input">
-          </div>
+          <app-input
+            label="Telefone"
+            inputId="register-phone"
+            type="tel"
+            [(ngModel)]="registerData.phone"
+            name="phone"
+            placeholder="(00) 00000-0000"
+            helperText="Opcional">
+          </app-input>
 
-          <div>
-            <label for="register-password" class="label">Senha *</label>
-            <input
-              type="password"
-              id="register-password"
-              [(ngModel)]="registerData.password"
-              name="password"
-              required
-              autocomplete="new-password"
-              placeholder="Mínimo 6 caracteres"
-              minlength="6"
-              class="input">
-            <p class="mt-1 text-xs text-gray-500">A senha deve ter no mínimo 6 caracteres</p>
-          </div>
+          <app-input
+            label="Senha"
+            inputId="register-password"
+            type="password"
+            [(ngModel)]="registerData.password"
+            name="password"
+            [required]="true"
+            autocomplete="new-password"
+            placeholder="Mínimo 6 caracteres"
+            minlength="6"
+            helperText="A senha deve ter no mínimo 6 caracteres"
+            [errorMessage]="error && activeTab === 'register' ? error : undefined">
+          </app-input>
 
-          <div>
-            <label for="register-confirm-password" class="label">Confirmar Senha *</label>
-            <input
-              type="password"
-              id="register-confirm-password"
-              [(ngModel)]="confirmPassword"
-              name="confirmPassword"
-              required
-              placeholder="Digite a senha novamente"
-              class="input">
-          </div>
+          <app-input
+            label="Confirmar Senha"
+            inputId="register-confirm-password"
+            type="password"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            [required]="true"
+            placeholder="Digite a senha novamente"
+            [errorMessage]="error && activeTab === 'register' ? error : undefined">
+          </app-input>
 
-          <button
+          <app-button
             type="submit"
+            variant="primary"
+            size="lg"
+            label="Criar Conta"
+            [loading]="loading"
             [disabled]="loading"
-            class="btn-primary w-full">
-            <span *ngIf="!loading">Criar Conta</span>
-            <span *ngIf="loading" class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Criando conta...
-            </span>
-          </button>
+            [fullWidth]="true">
+          </app-button>
         </form>
       </div>
-    </div>
 
-    <!-- Footer -->
-    <p class="mt-6 text-center text-white/80 text-sm">
-      Ao continuar, você concorda com nossos termos de uso e política de privacidade
-    </p>
+      <!-- Footer -->
+      <p class="mt-8 text-center text-sm text-gray-500">
+        Ao continuar, você concorda com nossos 
+        <a href="#" class="text-primary hover:text-primary-dark font-medium">termos de uso</a> 
+        e 
+        <a href="#" class="text-primary hover:text-primary-dark font-medium">política de privacidade</a>
+      </p>
+    </div>
   </div>
 </div>

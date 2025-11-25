@@ -1,3 +1,7 @@
+@import './app/shared/styles/design-tokens.css';
+@import './app/shared/styles/typography.css';
+@import './app/shared/styles/accessibility.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,22 +13,369 @@
   }
 
   body {
-    @apply font-sans text-base leading-normal text-gray-800 bg-background;
+    @apply font-sans text-base leading-normal text-gray-800;
+    background-color: #F5F7FA; /* Nova cor de background do rebranding */
+    color: #1F2937; /* Garantir cor de texto padrão */
+  }
+  
+  /* Garantir que cores customizadas sejam aplicadas */
+  * {
+    --tw-text-opacity: 1;
+    --tw-bg-opacity: 1;
+  }
+
+  /* Design Tokens - Variáveis definidas em design-tokens.css */
+
+  /* Tipografia - Classes já definidas no Tailwind config */
+}
+
+/* Lazy Loading Image Styles */
+@layer utilities {
+  img.lazy-loading {
+    filter: blur(5px);
+    transition: filter 0.3s ease-in-out;
+  }
+
+  img.lazy-loaded {
+    filter: blur(0);
+  }
+
+  img.lazy-error {
+    background-color: #f3f4f6;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 48px 48px;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 
 /* Custom Components */
 @layer components {
+  /* Garantir que classes de cores sejam aplicadas - Nova Paleta Rebranding */
+  .bg-primary,
+  button.bg-primary,
   .btn-primary {
-    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-primary-dark disabled:opacity-60 disabled:cursor-not-allowed;
+    background-color: #1A1F71 !important; /* Indigo profundo */
+    color: white !important;
+  }
+  
+  .bg-primary-dark {
+    background-color: #0E1117 !important; /* Preto azulado */
+  }
+  
+  .bg-primary-light {
+    background-color: #3128B2 !important; /* Indigo médio */
+  }
+  
+  .text-primary {
+    color: #1A1F71 !important;
+  }
+  
+  .bg-adalana,
+  .bg-adalana-DEFAULT {
+    background-color: #1A1F71 !important;
+  }
+  
+  .bg-adalana-light {
+    background-color: #3128B2 !important;
+  }
+  
+  .bg-adalana-dark {
+    background-color: #0E1117 !important;
+  }
+  
+  .bg-adalana-accent {
+    background-color: #FF4E42 !important; /* Vermelho vibrante iFood */
+  }
+  
+  .text-adalana,
+  .text-adalana-DEFAULT {
+    color: #1A1F71 !important;
+  }
+  
+  .text-adalana-light {
+    color: #3128B2 !important;
+  }
+  
+  .text-adalana-dark {
+    color: #0E1117 !important;
+  }
+  
+  .text-adalana-accent {
+    color: #FF4E42 !important;
+  }
+  
+  .bg-secondary {
+    background-color: #FF4E42 !important; /* Vermelho vibrante iFood */
+  }
+  
+  .text-secondary {
+    color: #FF4E42 !important;
+  }
+  
+  .bg-accent {
+    background-color: #FEC601 !important; /* Amarelo Mercado Livre */
+  }
+  
+  .text-accent {
+    color: #FEC601 !important;
+  }
+  
+  .bg-accent-2 {
+    background-color: #16B39A !important; /* Verde Amazon */
+  }
+  
+  .text-accent-2 {
+    color: #16B39A !important;
+  }
+  
+  .bg-success {
+    background-color: #16B39A !important; /* Verde Amazon */
+  }
+  
+  .text-success {
+    color: #16B39A !important;
+  }
+  
+  .bg-warning {
+    background-color: #FEC601 !important; /* Amarelo Mercado Livre */
+  }
+  
+  .text-warning {
+    color: #FEC601 !important;
+  }
+  
+  .bg-error {
+    background-color: #FF4E42 !important; /* Vermelho vibrante iFood */
+  }
+  
+  .text-error {
+    color: #FF4E42 !important;
+  }
+  
+  .bg-info {
+    background-color: #3128B2 !important; /* Indigo médio */
+  }
+  
+  .text-info {
+    color: #3128B2 !important;
+  }
+  
+  .bg-background,
+  .min-h-screen.bg-background,
+  div.bg-background,
+  section.bg-background {
+    background-color: #F5F7FA !important; /* Cinza suave */
+  }
+  
+  .bg-background-secondary {
+    background-color: #FFFFFF !important;
+  }
+  
+  .bg-background-tertiary {
+    background-color: #E5E7EB !important;
+  }
+  
+  .bg-surface,
+  .bg-white {
+    background-color: #FFFFFF !important;
+  }
+  
+  .bg-surface-elevated {
+    background-color: #FFFFFF !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  /* Simplified gradients - only for specific use cases */
+  .bg-gradient-primary {
+    background: #1A1F71 !important; /* Solid color instead of gradient */
+  }
+  
+  .bg-gradient-secondary {
+    background: #FF4E42 !important; /* Solid color instead of gradient */
+  }
+  
+  /* Garantir que texto seja branco em cards com background escuro */
+  app-card[ng-reflect-ng-style*="background"] .card-content,
+  app-card[ng-reflect-ng-style*="background"] .card-content *,
+  app-card[style*="background"] .card-content,
+  app-card[style*="background"] .card-content * {
+    color: white !important;
+  }
+  
+  /* Sobrescrever bg-surface quando há background customizado */
+  app-card > div[style*="background"] {
+    background-color: transparent !important;
+    background-image: inherit !important;
+  }
+  
+  app-card > div[style*="background"] .card-content,
+  app-card > div[style*="background"] .card-content * {
+    color: white !important;
+  }
+  
+  .bg-gradient-accent {
+    background: #FEC601 !important; /* Solid color instead of gradient */
+  }
+  
+  .bg-gradient-hero {
+    background: #1A1F71 !important; /* Solid color instead of gradient */
+  }
+  
+  .bg-gradient-card {
+    background: #F5F7FA !important; /* Light gray instead of gradient */
+  }
+  
+  .bg-gradient-marketplace {
+    background: #1A1F71 !important; /* Solid primary color instead of gradient */
+  }
+  
+  /* Gradientes com classes que não existem no Tailwind mas são usadas nos componentes */
+  /* Usando seletores mais específicos para garantir que funcionem */
+  [class*="from-adalana-lightBlue"][class*="to-adalana-pink"],
+  [class*="from-adalana-lightBlue"][class*="via-adalana-blue-500"][class*="to-adalana-darkBlue"],
+  [class*="from-adalana-lightBlue"][class*="via-adalana-pink-300"][class*="to-adalana-pink"] {
+    background: linear-gradient(to bottom right, #4A9EFF 0%, #E91E63 100%) !important;
+  }
+  
+  [class*="from-adalana-lightBlue"][class*="to-adalana-blue-600"] {
+    background: linear-gradient(to bottom right, #4A9EFF 0%, #1E88E5 100%) !important;
+  }
+  
+  [class*="from-adalana-darkBlue"][class*="to-adalana-darkBlue-800"]:not([class*="via"]),
+  section[class*="from-adalana-darkBlue"][class*="to-adalana-darkBlue-800"] {
+    background: linear-gradient(to right, #1E3A5F 0%, #12233B 100%) !important;
+  }
+  
+  [class*="from-adalana-darkBlue"][class*="via-adalana-darkBlue-800"][class*="to-adalana-darkBlue-900"],
+  div[class*="from-adalana-darkBlue"][class*="via-adalana-darkBlue-800"][class*="to-adalana-darkBlue-900"] {
+    background: linear-gradient(to bottom right, #1E3A5F 0%, #12233B 50%, #0F1F2F 100%) !important;
+  }
+  
+  [class*="from-adalana-darkBlue"][class*="to-adalana-darkBlue-800"]:not([class*="via"]),
+  app-card[class*="from-adalana-darkBlue"][class*="to-adalana-darkBlue-800"] {
+    background: linear-gradient(to bottom right, #1E3A5F 0%, #12233B 100%) !important;
+  }
+  
+  [class*="from-adalana-lightBlue"][class*="via-adalana-blue-500"][class*="to-adalana-darkBlue"] {
+    background: linear-gradient(to bottom right, #4A9EFF 0%, #2196F3 50%, #1E3A5F 100%) !important;
+  }
+  
+  [class*="from-adalana-lightBlue"][class*="via-adalana-pink"][class*="to-adalana-darkBlue"] {
+    background: linear-gradient(to bottom right, #4A9EFF 0%, rgba(233, 30, 99, 0.2) 50%, rgba(30, 58, 95, 0.2) 100%) !important;
+  }
+  
+  /* Gradientes com opacidade */
+  [class*="from-adalana-lightBlue/20"][class*="via-adalana-pink/20"][class*="to-adalana-darkBlue/20"] {
+    background: linear-gradient(to bottom right, rgba(74, 158, 255, 0.2) 0%, rgba(233, 30, 99, 0.2) 50%, rgba(30, 58, 95, 0.2) 100%) !important;
+  }
+  
+  /* Garantir que todos os elementos com bg-background tenham cor */
+  .min-h-screen {
+    min-height: 100vh;
+  }
+  
+  /* Garantir que body e html tenham background */
+  html, body {
+    background-color: #F5F7FA !important; /* Nova cor de background do rebranding */
+  }
+  
+  /* Garantir que app-root tenha background */
+  app-root {
+    background-color: #F5F7FA !important; /* Nova cor de background do rebranding */
+    display: block;
+  }
+  
+  app-root > div {
+    background-color: #F5F7FA !important; /* Nova cor de background do rebranding */
+  }
+  
+  /* Cores individuais que não existem no Tailwind */
+  .from-adalana-darkBlue {
+    --tw-gradient-from: #1E3A5F !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 58, 95, 0)) !important;
+  }
+  
+  .via-adalana-darkBlue-800 {
+    --tw-gradient-stops: var(--tw-gradient-from), #12233B, var(--tw-gradient-to, rgba(18, 35, 59, 0)) !important;
+  }
+  
+  .to-adalana-darkBlue-800 {
+    --tw-gradient-to: #12233B !important;
+  }
+  
+  .to-adalana-darkBlue-900 {
+    --tw-gradient-to: #0F1F2F !important;
+  }
+  
+  .from-adalana-lightBlue {
+    --tw-gradient-from: #4A9EFF !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(74, 158, 255, 0)) !important;
+  }
+  
+  .to-adalana-pink {
+    --tw-gradient-to: #E91E63 !important;
+  }
+  
+  .via-adalana-blue-500 {
+    --tw-gradient-stops: var(--tw-gradient-from), #2196F3, var(--tw-gradient-to, rgba(33, 150, 243, 0)) !important;
+  }
+  
+  .to-adalana-blue-600 {
+    --tw-gradient-to: #1E88E5 !important;
+  }
+  
+  .via-adalana-pink-300 {
+    --tw-gradient-stops: var(--tw-gradient-from), #F06292, var(--tw-gradient-to, rgba(240, 98, 146, 0)) !important;
+  }
+  
+  /* Focus rings */
+  .focus\:ring-adalana-lightBlue:focus {
+    --tw-ring-color: #4A9EFF !important;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 active:scale-95 active:bg-primary-dark focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px];
+  }
+
+  @media (min-width: 1024px) {
+    .btn-primary:hover {
+      @apply bg-primary-dark;
+    }
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium transition-all duration-200 active:scale-95 active:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px];
+  }
+
+  @media (min-width: 1024px) {
+    .btn-secondary:hover {
+      @apply bg-gray-300;
+    }
   }
 
   .btn-danger {
-    @apply bg-error text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-red-600 disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply bg-error text-white px-4 py-2 rounded-lg font-medium transition-all duration-200 active:scale-95 focus:ring-2 focus:ring-error focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px];
+    background-color: #FF4E42;
+  }
+
+  .btn-danger:active {
+    background-color: #E6392E;
+  }
+
+  @media (min-width: 1024px) {
+    .btn-danger:hover {
+      background-color: #E6392E;
+    }
   }
 
   .card {
@@ -36,7 +387,7 @@
   }
 
   .label {
-    @apply block text-sm font-medium text-gray-700 mb-1;
+    @apply block text-sm font-medium text-gray-700 mb-2.5;
   }
 
   .badge {
@@ -60,9 +411,209 @@
   }
 }
 
-/* Utility Classes */
+/* Utility Classes - Glass Morphism & Modern Effects */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Glass Morphism Effects */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-dark {
+    background: rgba(30, 58, 95, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(74, 158, 255, 0.3);
+  }
+
+  .glass-light {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Mobile-first Touch Effects - Active states for mobile, hover only for desktop */
+  .hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .hover-lift:active {
+    transform: scale(0.98);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (min-width: 1024px) {
+    .hover-lift:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease;
+  }
+
+  .hover-scale:active {
+    transform: scale(0.95);
+  }
+
+  @media (min-width: 1024px) {
+    .hover-scale:hover {
+      transform: scale(1.02);
+    }
+  }
+
+  .hover-glow {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .hover-glow:active {
+    box-shadow: 0 0 0 2px rgba(26, 31, 113, 0.2);
+  }
+
+  @media (min-width: 1024px) {
+    .hover-glow:hover {
+      box-shadow: 0 0 12px rgba(26, 31, 113, 0.3);
+    }
+  }
+
+  /* Focus Effects */
+  .focus-ring {
+    transition: box-shadow 0.2s ease;
+  }
+
+  .focus-ring:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.3);
+  }
+
+  /* Animations from animations.css */
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .animate-slide-in-up {
+    animation: slideInUp 0.4s ease-out;
+  }
+
+  .animate-slide-in-down {
+    animation: slideInDown 0.4s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.4s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      to right,
+      #f6f7f8 0%,
+      #edeef1 20%,
+      #f6f7f8 40%,
+      #f6f7f8 100%
+    );
+    background-size: 1000px 100%;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInDown {
+    from {
+      transform: translateY(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
   }
 }

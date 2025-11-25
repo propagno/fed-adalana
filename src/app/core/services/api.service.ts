@@ -18,7 +18,7 @@ export class ApiService {
     });
   }
 
-  get<T>(endpoint: string, params?: any): Observable<T> {
+  get<T>(endpoint: string, params?: any, useCache: boolean = false, customHeaders?: HttpHeaders): Observable<T> {
     let httpParams = new HttpParams();
     if (params) {
       Object.keys(params).forEach(key => {
@@ -27,15 +27,43 @@ export class ApiService {
         }
       });
     }
+    
+    let headers = this.getHeaders();
+    if (useCache) {
+      headers = headers.set('X-Cache', 'true');
+    }
+    if (customHeaders) {
+      customHeaders.keys().forEach(key => {
+        headers = headers.set(key, customHeaders.get(key)!);
+      });
+    }
+    
     return this.http.get<T>(`${this.baseUrl}${endpoint}`, {
-      headers: this.getHeaders(),
+      headers: headers,
       params: httpParams
     });
   }
 
-  post<T>(endpoint: string, body: any): Observable<T> {
+  post<T>(endpoint: string, body: any, params?: any, customHeaders?: HttpHeaders): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+    
+    let headers = this.getHeaders();
+    if (customHeaders) {
+      customHeaders.keys().forEach(key => {
+        headers = headers.set(key, customHeaders.get(key)!);
+      });
+    }
+    
     return this.http.post<T>(`${this.baseUrl}${endpoint}`, body, {
-      headers: this.getHeaders()
+      headers: headers,
+      params: httpParams
     });
   }
 
@@ -45,15 +73,49 @@ export class ApiService {
     });
   }
 
-  put<T>(endpoint: string, body: any): Observable<T> {
+  put<T>(endpoint: string, body: any, params?: any, customHeaders?: HttpHeaders): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+    
+    let headers = this.getHeaders();
+    if (customHeaders) {
+      customHeaders.keys().forEach(key => {
+        headers = headers.set(key, customHeaders.get(key)!);
+      });
+    }
+    
     return this.http.put<T>(`${this.baseUrl}${endpoint}`, body, {
-      headers: this.getHeaders()
+      headers: headers,
+      params: httpParams
     });
   }
 
-  delete<T>(endpoint: string): Observable<T> {
+  delete<T>(endpoint: string, params?: any, customHeaders?: HttpHeaders): Observable<T> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.keys(params).forEach(key => {
+        if (params[key] !== null && params[key] !== undefined) {
+          httpParams = httpParams.set(key, params[key].toString());
+        }
+      });
+    }
+    
+    let headers = this.getHeaders();
+    if (customHeaders) {
+      customHeaders.keys().forEach(key => {
+        headers = headers.set(key, customHeaders.get(key)!);
+      });
+    }
+    
     return this.http.delete<T>(`${this.baseUrl}${endpoint}`, {
-      headers: this.getHeaders()
+      headers: headers,
+      params: httpParams
     });
   }
 }

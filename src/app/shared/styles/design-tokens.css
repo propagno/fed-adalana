@@ -1,0 +1,265 @@
+/**
+ * Adalana Design System - Design Tokens
+ * Tokens CSS para o rebranding marketplace premium
+ * Baseado no plano de rebranding: iFood, Mercado Livre, Amazon
+ */
+
+:root {
+  /* ============================================
+     CORES DA MARCA - NOVA PALETA REBRANDING
+     ============================================ */
+  
+  /* Adalana Brand Colors */
+  --adalana-indigo: #1A1F71;           /* Primária - Indigo profundo */
+  --adalana-indigo-light: #3128B2;     /* Indigo médio */
+  --adalana-indigo-dark: #0E1117;       /* Preto azulado */
+  --adalana-red: #FF4E42;               /* Secundária - Vermelho vibrante iFood */
+  --adalana-yellow: #FEC601;            /* Accent 1 - Amarelo Mercado Livre */
+  --adalana-green: #16B39A;             /* Accent 2 - Verde Amazon */
+  
+  /* Cores Primárias */
+  --color-primary: var(--adalana-indigo);
+  --color-primary-dark: var(--adalana-indigo-dark);
+  --color-primary-light: var(--adalana-indigo-light);
+  
+  /* Cores Secundárias */
+  --color-secondary: var(--adalana-red);
+  --color-secondary-dark: #E6392E;
+  --color-secondary-light: #FF6B60;
+  
+  /* Cores de Accent */
+  --color-accent: var(--adalana-yellow);
+  --color-accent-dark: #E6B201;
+  --color-accent-light: #FFD933;
+  
+  --color-accent-2: var(--adalana-green);
+  --color-accent-2-dark: #129F89;
+  --color-accent-2-light: #1AC7B0;
+  
+  /* Cores Semânticas */
+  --color-success: var(--adalana-green);
+  --color-success-light: #1AC7B0;
+  --color-success-dark: #129F89;
+  
+  --color-warning: var(--adalana-yellow);
+  --color-warning-light: #FFD933;
+  --color-warning-dark: #E6B201;
+  
+  --color-error: var(--adalana-red);
+  --color-error-light: #FF6B60;
+  --color-error-dark: #E6392E;
+  
+  --color-info: var(--adalana-indigo-light);
+  --color-info-light: #5256B8;
+  --color-info-dark: var(--adalana-indigo);
+  
+  /* Neutros */
+  --color-gray-50: #F5F7FA;
+  --color-gray-100: #E5E7EB;
+  --color-gray-200: #D1D5DB;
+  --color-gray-300: #9CA3AF;
+  --color-gray-400: #6B7280;
+  --color-gray-500: #4B5563;
+  --color-gray-600: #374151;
+  --color-gray-700: #1F2937;
+  --color-gray-800: #111827;
+  --color-gray-900: #0E1117;
+  
+  /* Backgrounds */
+  --color-background: #F5F7FA;
+  --color-background-secondary: #FFFFFF;
+  --color-background-tertiary: #E5E7EB;
+  
+  /* Surfaces */
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #FFFFFF;
+  --color-surface-overlay: rgba(14, 17, 23, 0.5);
+  
+  /* ============================================
+     TIPOGRAFIA
+     ============================================ */
+  
+  /* Font Families */
+  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
+  --font-family-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono: ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
+  
+  /* Font Sizes */
+  --font-size-display: 48px;
+  --font-size-h1: 36px;
+  --font-size-h2: 30px;
+  --font-size-h3: 24px;
+  --font-size-h4: 20px;
+  --font-size-body-lg: 18px;
+  --font-size-body: 16px;
+  --font-size-body-sm: 14px;
+  --font-size-caption: 12px;
+  
+  /* Line Heights */
+  --line-height-display: 56px;
+  --line-height-h1: 44px;
+  --line-height-h2: 38px;
+  --line-height-h3: 32px;
+  --line-height-h4: 28px;
+  --line-height-body-lg: 28px;
+  --line-height-body: 24px;
+  --line-height-body-sm: 20px;
+  --line-height-caption: 16px;
+  
+  /* Font Weights */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Letter Spacing */
+  --letter-spacing-tight: -0.02em;
+  --letter-spacing-normal: -0.01em;
+  --letter-spacing-wide: 0.01em;
+  
+  /* ============================================
+     ESPAÇAMENTO
+     ============================================ */
+  
+  /* Baseado em 4px */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-18: 72px;
+  --spacing-22: 88px;
+  
+  /* ============================================
+     SOMBRAS (ELEVAÇÕES)
+     ============================================ */
+  
+  --shadow-elevation-0: none;
+  --shadow-elevation-1: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-elevation-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-elevation-3: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-elevation-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Shadows específicas da marca */
+  --shadow-brand-md: 0 15px 35px -10px rgba(26, 31, 113, 0.4);
+  --shadow-brand-lg: 0 25px 50px -12px rgba(26, 31, 113, 0.5);
+  
+  /* ============================================
+     BORDER RADIUS
+     ============================================ */
+  
+  --radius-xs: 4px;
+  --radius-small: 4px;
+  --radius-medium: 8px;
+  --radius-large: 12px;
+  --radius-lg: 16px;
+  --radius-xlarge: 16px;
+  --radius-pill: 999px;
+  
+  /* ============================================
+     GRADIENTES
+     ============================================ */
+  
+  --gradient-primary: linear-gradient(135deg, #1A1F71 0%, #0E1117 100%);
+  --gradient-secondary: linear-gradient(135deg, #FF4E42 0%, #E6392E 100%);
+  --gradient-accent: linear-gradient(135deg, #FEC601 0%, #E6B201 100%);
+  --gradient-hero: linear-gradient(135deg, #0E1117 0%, #1A1F71 50%, #3128B2 100%);
+  --gradient-card: linear-gradient(180deg, rgba(26, 31, 113, 0.05) 0%, transparent 100%);
+  --gradient-marketplace: linear-gradient(135deg, #1A1F71 0%, #3128B2 50%, #FF4E42 100%);
+  
+  /* ============================================
+     TRANSIÇÕES E ANIMAÇÕES
+     ============================================ */
+  
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+  --transition-slow: 350ms;
+  
+  --easing-brand: cubic-bezier(0.33, 1, 0.68, 1);
+  --easing-ease-out: ease-out;
+  --easing-ease-in: ease-in;
+  --easing-ease-in-out: ease-in-out;
+  
+  /* ============================================
+     Z-INDEX
+     ============================================ */
+  
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-floating-cart: 1000;
+  --z-sticky: 1020;
+  --z-navbar: 1020;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-tooltip: 1060;
+  --z-toast: 1070;
+  
+  /* ============================================
+     BREAKPOINTS (para uso em media queries)
+     ============================================ */
+  
+  --breakpoint-xs: 475px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+  
+  /* ============================================
+     OUTROS TOKENS
+     ============================================ */
+  
+  /* Opacidades */
+  --opacity-disabled: 0.6;
+  --opacity-hover: 0.8;
+  --opacity-pressed: 0.9;
+  
+  /* Borders */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+  
+  --border-color-default: var(--color-gray-200);
+  --border-color-focus: var(--color-primary);
+  --border-color-error: var(--color-error);
+  
+  /* Focus Rings */
+  --focus-ring-width: 3px;
+  --focus-ring-color: rgba(26, 31, 113, 0.3);
+  --focus-ring-offset: 2px;
+}
+
+/* ============================================
+   CLASSES UTILITÁRIAS BASEADAS NOS TOKENS
+   ============================================ */
+
+/* Transições padronizadas */
+.transition-brand {
+  transition: all var(--transition-base) var(--easing-brand);
+}
+
+.transition-fast {
+  transition: all var(--transition-fast) var(--easing-ease-out);
+}
+
+.transition-slow {
+  transition: all var(--transition-slow) var(--easing-ease-out);
+}
+
+/* Focus rings acessíveis */
+.focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+}
+
+/* Tabular numbers para preços */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+

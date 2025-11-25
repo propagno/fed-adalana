@@ -48,14 +48,14 @@
           <tr *ngFor="let item of delivery.items">
             <td>{{ item.product_name }}</td>
             <td>{{ item.quantity }}</td>
-            <td>{{ item.unit_price | currency:delivery.currency:'symbol':'1.2-2' }}</td>
-            <td>{{ item.total_price | currency:delivery.currency:'symbol':'1.2-2' }}</td>
+            <td>{{ formatCurrency(item.unit_price) }}</td>
+            <td>{{ formatCurrency(item.total_price) }}</td>
           </tr>
         </tbody>
         <tfoot>
           <tr>
             <td colspan="3"><strong>Total:</strong></td>
-            <td><strong>{{ delivery.total_amount | currency:delivery.currency:'symbol':'1.2-2' }}</strong></td>
+            <td><strong>{{ formatCurrency(delivery.total_amount) }}</strong></td>
           </tr>
         </tfoot>
       </table>
@@ -92,6 +92,7 @@
 
     <div *ngIf="delivery.status !== 'delivered' && delivery.status !== 'failed'" class="detail-section">
       <h2>Marcar como Entregue</h2>
+      <p class="info-text">Para confirmar a entrega, você precisará do código de confirmação (OTP) fornecido pelo cliente.</p>
       <div class="form-group">
         <label for="delivery-notes">Observações:</label>
         <textarea 
@@ -124,6 +125,48 @@
       <button class="btn btn-danger" (click)="markAsFailed()" [disabled]="actionLoading">
         ✗ Marcar como Falha
       </button>
+    </div>
+  </div>
+
+  <!-- Modal para inserir código OTP -->
+  <div *ngIf="showDeliveryCodeModal" style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:1rem" (click)="cancelDeliveryCodeModal()">
+    <div style="background:#fff;border-radius:8px;max-width:500px;width:100%;box-shadow:0 10px 25px rgba(0,0,0,.2);animation:slideIn .3s ease-out" (click)="$event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:1.5rem;border-bottom:1px solid #e5e7eb">
+        <h2 style="margin:0;color:#333;font-size:1.5rem">Confirmar Entrega</h2>
+        <button style="background:none;border:none;font-size:2rem;color:#6b7280;cursor:pointer;padding:0;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:4px" (click)="cancelDeliveryCodeModal()" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='none'">×</button>
+      </div>
+      <div style="padding:1.5rem">
+        <p style="color:#6b7280;font-size:.9rem;margin-bottom:1rem;padding:.75rem;background:#f3f4f6;border-radius:4px;border-left:3px solid #3b82f6">Por favor, solicite ao cliente o código de confirmação (OTP) de 4 dígitos que foi enviado para ele.</p>
+        
+        <div class="form-group">
+          <label for="delivery-code">Código de Confirmação (OTP):</label>
+          <input 
+            type="text" 
+            id="delivery-code" 
+            [(ngModel)]="deliveryCode" 
+            maxlength="4"
+            placeholder="0000"
+            style="font-size:1.5rem;text-align:center;letter-spacing:.5rem;font-weight:600;padding:1rem;border:2px solid #d1d5db;border-radius:8px;width:100%;outline:0"
+            (keyup.enter)="confirmDeliveryWithCode()"
+            (focus)="$any($event.target).style.borderColor='#3b82f6';$any($event.target).style.boxShadow='0 0 0 3px rgba(59,130,246,.1)'"
+            (blur)="$any($event.target).style.borderColor='#d1d5db';$any($event.target).style.boxShadow='none'"
+            autofocus>
+          <small style="display:block;margin-top:.5rem;color:#6b7280;font-size:.875rem">Digite o código de 4 dígitos fornecido pelo cliente</small>
+        </div>
+
+        <div *ngIf="error" style="background:#fee2e2;border:1px solid #fecaca;border-radius:4px;padding:.75rem;margin-top:1rem">
+          <p style="margin:0;color:#991b1b;font-size:.9rem">{{ error }}</p>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.75rem;padding:1.5rem;border-top:1px solid #e5e7eb">
+        <button class="btn btn-secondary" (click)="cancelDeliveryCodeModal()" [disabled]="actionLoading">
+          Cancelar
+        </button>
+        <button class="btn btn-success" (click)="confirmDeliveryWithCode()" [disabled]="actionLoading || !deliveryCode || deliveryCode.trim().length === 0">
+          <span *ngIf="actionLoading">Confirmando...</span>
+          <span *ngIf="!actionLoading">Confirmar Entrega</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>

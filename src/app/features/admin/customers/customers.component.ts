@@ -4,185 +4,31 @@ import { FormsModule } from '@angular/forms';
 import { CustomerService, Customer, CreateCustomerRequest, UpdateCustomerRequest } from '../../../core/services/customer.service';
 import { FormatUtil } from '../../../shared/utils/format.util';
 import { AdminService, LeadsMetrics } from '../../../core/services/admin.service';
+import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { PageHeaderComponent } from '../../../shared/components/design-system/page-header/page-header.component';
+import { DataListComponent } from '../../../shared/components/design-system/data-list/data-list.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { CardComponent } from '../../../shared/components/design-system/card/card.component';
+import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
+import { BadgeComponent } from '../../../shared/components/design-system/badge/badge.component';
 
 type FilterType = 'all' | 'leads' | 'customers';
 
 @Component({
   selector: 'app-customers',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900">Clientes e Leads</h2>
-          <p class="text-sm text-gray-600 mt-1">Gerencie leads e clientes da sua empresa</p>
-        </div>
-        <button (click)="showCreateForm = !showCreateForm" class="btn-primary">
-          {{ showCreateForm ? 'Cancelar' : '+ Novo Lead' }}
-        </button>
-      </div>
-
-      <!-- Metrics Cards -->
-      <div *ngIf="leadsMetrics" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div class="card bg-gray-50">
-          <h3 class="text-sm font-medium text-gray-600 mb-2">Total de Leads</h3>
-          <p class="text-3xl font-bold text-gray-900">{{ leadsMetrics.total_leads }}</p>
-        </div>
-        <div class="card bg-primary-light text-white">
-          <h3 class="text-sm font-medium text-white/90 mb-2">Total de Clientes</h3>
-          <p class="text-3xl font-bold">{{ leadsMetrics.total_customers }}</p>
-        </div>
-        <div class="card bg-success text-white">
-          <h3 class="text-sm font-medium text-white/90 mb-2">Leads Convertidos</h3>
-          <p class="text-3xl font-bold">{{ leadsMetrics.converted_leads }}</p>
-        </div>
-        <div class="card bg-primary text-white">
-          <h3 class="text-sm font-medium text-white/90 mb-2">Taxa de Conversão</h3>
-          <p class="text-3xl font-bold">{{ formatPercentage(leadsMetrics.conversion_rate) }}</p>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="card mb-6">
-        <div class="flex gap-2">
-          <button 
-            (click)="setFilter('all')" 
-            [class]="activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'">
-            Todos
-          </button>
-          <button 
-            (click)="setFilter('leads')" 
-            [class]="activeFilter === 'leads' ? 'btn-primary' : 'btn-secondary'">
-            Apenas Leads
-          </button>
-          <button 
-            (click)="setFilter('customers')" 
-            [class]="activeFilter === 'customers' ? 'btn-primary' : 'btn-secondary'">
-            Apenas Clientes
-          </button>
-        </div>
-      </div>
-
-      <!-- Create/Edit Form -->
-      <div *ngIf="showCreateForm" class="card mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingCustomer ? 'Editar Cliente' : 'Novo Lead' }}
-        </h3>
-        <form (ngSubmit)="saveCustomer()" #customerForm="ngForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="label">Nome *</label>
-              <input [(ngModel)]="customerFormData.name" name="name" required class="input">
-            </div>
-            <div>
-              <label class="label">Email *</label>
-              <input type="email" [(ngModel)]="customerFormData.email" name="email" required class="input">
-            </div>
-            <div>
-              <label class="label">Telefone *</label>
-              <input [(ngModel)]="customerFormData.phone" name="phone" required class="input">
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Endereço *</label>
-              <textarea [(ngModel)]="customerFormData.address" name="address" required 
-                        class="input" rows="3"></textarea>
-            </div>
-            <div>
-              <label class="label">Dia Preferido de Entrega</label>
-              <select [(ngModel)]="customerFormData.preferred_delivery_day" name="preferred_delivery_day" class="input">
-                <option value="">Nenhum</option>
-                <option value="mon">Segunda-feira</option>
-                <option value="tue">Terça-feira</option>
-                <option value="wed">Quarta-feira</option>
-                <option value="thu">Quinta-feira</option>
-                <option value="fri">Sexta-feira</option>
-                <option value="sat">Sábado</option>
-                <option value="sun">Domingo</option>
-              </select>
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Observações</label>
-              <textarea [(ngModel)]="customerFormData.notes" name="notes" 
-                        class="input" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="flex justify-end gap-3 pt-4">
-            <button type="button" (click)="cancelForm()" class="btn-secondary">Cancelar</button>
-            <button type="submit" [disabled]="saving" class="btn-primary">
-              {{ saving ? 'Salvando...' : (editingCustomer ? 'Atualizar' : 'Criar') }}
-            </button>
-          </div>
-          <div *ngIf="error" class="mt-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
-            {{ error }}
-          </div>
-        </form>
-      </div>
-
-      <!-- Customers Table -->
-      <div class="card">
-        <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando clientes...</div>
-        <div *ngIf="filteredCustomers && !loading">
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="bg-surface divide-y divide-gray-200">
-                <tr *ngFor="let customer of filteredCustomers" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ customer.name }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ customer.email }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ formatPhone(customer.phone) }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span [class]="getCustomerTypeClass(customer.customer_type)">
-                      {{ getCustomerTypeLabel(customer.customer_type) }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span [class]="customer.active ? 'badge-success' : 'badge-error'">
-                      {{ customer.active ? 'Ativo' : 'Inativo' }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div class="flex justify-end gap-2">
-                      <button 
-                        *ngIf="customer.customer_type === 'LEAD'" 
-                        (click)="promoteLead(customer)" 
-                        class="text-primary hover:text-primary-dark">
-                        Promover
-                      </button>
-                      <button (click)="editCustomer(customer)" class="text-primary hover:text-primary-dark">
-                        Editar
-                      </button>
-                      <button (click)="deleteCustomer(customer)" class="text-error hover:text-error-dark">
-                        Excluir
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="filteredCustomers.length === 0" class="text-center py-8 text-gray-500">
-            Nenhum {{ activeFilter === 'all' ? 'cliente' : activeFilter === 'leads' ? 'lead' : 'cliente' }} encontrado
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [
+    CommonModule,
+    FormsModule,
+    PageHeaderComponent,
+    DataListComponent,
+    ModalComponent,
+    CardComponent,
+    ButtonComponent,
+    BadgeComponent
+  ],
+  templateUrl: './customers.component.html',
   styles: []
 })
 export class CustomersComponent implements OnInit {
@@ -195,6 +41,7 @@ export class CustomersComponent implements OnInit {
   error: string | null = null;
   activeFilter: FilterType = 'all';
   leadsMetrics: LeadsMetrics | null = null;
+  searchTerm = '';
 
   customerFormData: CreateCustomerRequest = {
     name: '',
@@ -207,7 +54,9 @@ export class CustomersComponent implements OnInit {
 
   constructor(
     private customerService: CustomerService,
-    private adminService: AdminService
+    private adminService: AdminService,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -220,7 +69,7 @@ export class CustomersComponent implements OnInit {
     this.customerService.getCustomers().subscribe({
       next: (customers) => {
         this.customers = customers;
-        this.applyFilter();
+        this.applySearch();
         this.loading = false;
       },
       error: (err) => {
@@ -246,17 +95,34 @@ export class CustomersComponent implements OnInit {
 
   setFilter(filter: FilterType): void {
     this.activeFilter = filter;
-    this.applyFilter();
+    this.applySearch();
   }
 
   applyFilter(): void {
-    if (this.activeFilter === 'all') {
-      this.filteredCustomers = this.customers;
-    } else if (this.activeFilter === 'leads') {
-      this.filteredCustomers = this.customers.filter(c => c.customer_type === 'LEAD');
+    this.applySearch();
+  }
+
+  applySearch(): void {
+    let filtered = this.customers;
+
+    // Apply type filter
+    if (this.activeFilter === 'leads') {
+      filtered = filtered.filter(c => c.customer_type === 'LEAD');
     } else if (this.activeFilter === 'customers') {
-      this.filteredCustomers = this.customers.filter(c => c.customer_type === 'CUSTOMER');
+      filtered = filtered.filter(c => c.customer_type === 'CUSTOMER');
     }
+
+    // Apply search term
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(c => 
+        c.name.toLowerCase().includes(term) ||
+        c.email.toLowerCase().includes(term) ||
+        (c.phone && c.phone.toLowerCase().includes(term))
+      );
+    }
+
+    this.filteredCustomers = filtered;
   }
 
   saveCustomer(): void {
@@ -281,12 +147,14 @@ export class CustomersComponent implements OnInit {
       this.customerService.updateCustomer(this.editingCustomer.id, updateData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Cliente atualizado com sucesso!');
           this.cancelForm();
           this.loadCustomers();
           this.loadLeadsMetrics();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao atualizar cliente');
           this.error = err.error?.message || 'Erro ao atualizar cliente';
         }
       });
@@ -294,12 +162,14 @@ export class CustomersComponent implements OnInit {
       this.customerService.createCustomer(this.customerFormData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Lead criado com sucesso!');
           this.cancelForm();
           this.loadCustomers();
           this.loadLeadsMetrics();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao criar cliente');
           this.error = err.error?.message || 'Erro ao criar cliente';
         }
       });
@@ -320,31 +190,51 @@ export class CustomersComponent implements OnInit {
   }
 
   promoteLead(customer: Customer): void {
-    if (confirm(`Tem certeza que deseja promover o lead ${customer.name} a cliente?`)) {
-      this.customerService.promoteLeadToCustomer(customer.id).subscribe({
-        next: () => {
-          this.loadCustomers();
-          this.loadLeadsMetrics();
-        },
-        error: (err) => {
-          this.error = err.error?.message || 'Erro ao promover lead';
-        }
-      });
-    }
+    this.confirmationService.confirm({
+      title: 'Promover Lead',
+      message: `Tem certeza que deseja promover o lead ${customer.name} a cliente?`,
+      confirmLabel: 'Promover',
+      cancelLabel: 'Cancelar',
+      confirmVariant: 'primary'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        this.customerService.promoteLeadToCustomer(customer.id).subscribe({
+          next: () => {
+            this.toastService.success('Lead promovido a cliente com sucesso!');
+            this.loadCustomers();
+            this.loadLeadsMetrics();
+          },
+          error: (err) => {
+            this.toastService.error(err.error?.message || 'Erro ao promover lead');
+            this.error = err.error?.message || 'Erro ao promover lead';
+          }
+        });
+      }
+    });
   }
 
   deleteCustomer(customer: Customer): void {
-    if (confirm(`Tem certeza que deseja excluir o ${customer.customer_type === 'LEAD' ? 'lead' : 'cliente'} ${customer.name}?`)) {
-      this.customerService.deleteCustomer(customer.id).subscribe({
-        next: () => {
-          this.loadCustomers();
-          this.loadLeadsMetrics();
-        },
-        error: (err) => {
-          this.error = err.error?.message || 'Erro ao excluir cliente';
-        }
-      });
-    }
+    this.confirmationService.confirm({
+      title: 'Excluir ' + (customer.customer_type === 'LEAD' ? 'Lead' : 'Cliente'),
+      message: `Tem certeza que deseja excluir o ${customer.customer_type === 'LEAD' ? 'lead' : 'cliente'} ${customer.name}? Esta ação não pode ser desfeita.`,
+      confirmLabel: 'Excluir',
+      cancelLabel: 'Cancelar',
+      confirmVariant: 'danger'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        this.customerService.deleteCustomer(customer.id).subscribe({
+          next: () => {
+            this.toastService.success(`${customer.customer_type === 'LEAD' ? 'Lead' : 'Cliente'} excluído com sucesso!`);
+            this.loadCustomers();
+            this.loadLeadsMetrics();
+          },
+          error: (err) => {
+            this.toastService.error(err.error?.message || 'Erro ao excluir cliente');
+            this.error = err.error?.message || 'Erro ao excluir cliente';
+          }
+        });
+      }
+    });
   }
 
   cancelForm(): void {
@@ -372,13 +262,5 @@ export class CustomersComponent implements OnInit {
   getCustomerTypeLabel(type?: string): string {
     return type === 'LEAD' ? 'Lead' : type === 'CUSTOMER' ? 'Cliente' : 'N/A';
   }
-
-  getCustomerTypeClass(type?: string): string {
-    if (type === 'LEAD') {
-      return 'badge badge-warning';
-    } else if (type === 'CUSTOMER') {
-      return 'badge badge-success';
-    }
-    return 'badge badge-secondary';
-  }
 }
+

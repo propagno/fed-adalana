@@ -1,0 +1,113 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <app-page-header
+    title="Configurações de Entrega"
+    description="Configure como o frete será calculado para suas entregas"
+    [showActions]="false">
+  </app-page-header>
+
+  <app-card variant="default" [elevation]="1" padding="lg">
+    <h2 class="text-h2 mb-6">Configurações de Entrega</h2>
+    
+    <form [formGroup]="deliveryForm" class="space-y-6" (ngSubmit)="saveSettings()">
+      <!-- Endereço de Origem -->
+      <div>
+        <h3 class="text-h3 mb-4">Endereço de Origem</h3>
+        <p class="text-body-sm text-gray-600 mb-4">
+          Este é o endereço de onde as entregas partem. Usado para calcular distância.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <app-input formControlName="originCep"
+                     label="CEP"
+                     mask="00000-000"
+                     (blur)="searchOriginCep()"
+                     placeholder="00000-000">
+          </app-input>
+          
+          <app-input formControlName="originStreet"
+                     label="Logradouro"
+                     placeholder="Rua, Avenida, etc.">
+          </app-input>
+          
+          <app-input formControlName="originNumber"
+                     label="Número"
+                     placeholder="123">
+          </app-input>
+          
+          <app-input formControlName="originNeighborhood"
+                     label="Bairro"
+                     placeholder="Nome do bairro">
+          </app-input>
+          
+          <app-input formControlName="originCity"
+                     label="Cidade"
+                     placeholder="Nome da cidade">
+          </app-input>
+          
+          <app-input formControlName="originState"
+                     label="Estado"
+                     [maxLength]="2"
+                     placeholder="UF">
+          </app-input>
+        </div>
+      </div>
+      
+      <!-- Precificação -->
+      <div class="border-t border-gray-200 pt-6">
+        <h3 class="text-h3 mb-4">Precificação</h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <app-input formControlName="pricePerKm"
+                     type="number"
+                     label="Valor por KM (R$)"
+                     [required]="true"
+                     [min]="0"
+                     [step]="0.01"
+                     placeholder="0.00">
+          </app-input>
+          
+          <app-input formControlName="maxDeliveryRadiusKm"
+                     type="number"
+                     label="Raio Máximo (KM)"
+                     [required]="true"
+                     [min]="1"
+                     placeholder="50">
+          </app-input>
+          
+          <app-input formControlName="minimumOrderValue"
+                     type="number"
+                     label="Pedido Mínimo (R$)"
+                     [min]="0"
+                     [step]="0.01"
+                     placeholder="0.00">
+          </app-input>
+        </div>
+        
+        <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 class="text-body font-medium text-blue-900 mb-2">Exemplo de Cálculo</h4>
+          <div class="space-y-1 text-body-sm text-blue-800">
+            <p>Cliente a 5 km de distância:</p>
+            <p class="font-medium">
+              Frete = 5 km × R$ {{ deliveryForm.get('pricePerKm')?.value || 0 }} = R$ {{ calculateExampleFee() }}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <app-button variant="outline" 
+                    label="Cancelar" 
+                    type="button"
+                    (clicked)="resetForm()">
+        </app-button>
+        <app-button variant="primary" 
+                    label="Salvar Configurações" 
+                    type="submit"
+                    [loading]="saving"
+                    [disabled]="deliveryForm.invalid || saving">
+        </app-button>
+      </div>
+    </form>
+  </app-card>
+</div>
+

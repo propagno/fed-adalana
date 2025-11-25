@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService, RegisterCustomerRequest } from '../../../core/services/auth.service';
-
+import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
+import { CardComponent } from '../../../shared/components/design-system/card/card.component';
+import { InputComponent } from '../../../shared/components/design-system/input/input.component';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, ButtonComponent, CardComponent, InputComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -30,6 +32,8 @@ export class LoginComponent {
   loading = false;
   error: string | null = null;
   successMessage: string | null = null;
+  emailNotVerified = false;
+  resendingVerification = false;
 
   constructor(
     private authService: AuthService,
@@ -40,6 +44,29 @@ export class LoginComponent {
     this.activeTab = tab;
     this.error = null;
     this.successMessage = null;
+    this.emailNotVerified = false;
+  }
+
+  resendVerificationEmail(): void {
+    if (!this.email) {
+      this.error = 'Por favor, informe seu email';
+      return;
+    }
+
+    this.resendingVerification = true;
+    this.error = null;
+
+    this.authService.resendVerification(this.email).subscribe({
+      next: () => {
+        this.resendingVerification = false;
+        this.successMessage = 'Email de verificação reenviado com sucesso! Verifique sua caixa de entrada.';
+        this.emailNotVerified = false;
+      },
+      error: (err) => {
+        this.resendingVerification = false;
+        this.error = err.error?.message || 'Erro ao reenviar email. Tente novamente mais tarde.';
+      }
+    });
   }
 
   onSubmitLogin(): void {
@@ -59,6 +86,7 @@ export class LoginComponent {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         this.loading = false;
+        this.emailNotVerified = false;
         // Redirect based on role
         if (response.role === 'super_admin') {
           this.router.navigate(['/super-admin']);
@@ -72,7 +100,16 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err.error?.message || 'Email ou senha incorretos';
+        const errorMessage = err.error?.message || '';
+        
+        // Verifica se o erro é de email não verificado
+        if (errorMessage.includes('Email não verificado') || errorMessage.includes('email não verificado')) {
+          this.emailNotVerified = true;
+          this.error = 'Seu email ainda não foi verificado. Por favor, verifique sua caixa de entrada e clique no link de verificação.';
+        } else {
+          this.emailNotVerified = false;
+          this.error = errorMessage || 'Email ou senha incorretos';
+        }
         console.error('Login error', err);
       }
     });
@@ -101,10 +138,17 @@ export class LoginComponent {
     this.authService.registerCustomer(this.registerData).subscribe({
       next: (response) => {
         this.loading = false;
-        this.successMessage = 'Conta criada com sucesso! Redirecionando...';
-        setTimeout(() => {
-          this.router.navigate(['/catalog']);
-        }, 1500);
+        this.error = null;
+        this.successMessage = `Conta criada com sucesso! Enviamos um email de verificação para ${this.registerData.email}. Por favor, verifique sua caixa de entrada e clique no link para ativar sua conta antes de fazer login.`;
+        // Limpa o formulário
+        this.registerData = {
+          name: '',
+          email: '',
+          password: '',
+          phone: ''
+        };
+        this.confirmPassword = '';
+        // Não redireciona automaticamente - deixa o usuário ver a mensagem e fazer login depois
       },
       error: (err) => {
         this.loading = false;

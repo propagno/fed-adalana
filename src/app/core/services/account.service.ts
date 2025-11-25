@@ -15,6 +15,20 @@ export interface Account {
   trade_name?: string;
   legal_name?: string;
   image_url?: string;
+  category?: string;
+  phone?: string;
+  address?: string;
+}
+
+export interface AddressDTO {
+  cep?: string;
+  street?: string;
+  number?: string;
+  complement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  country?: string;
 }
 
 export interface CreateAccountRequest {
@@ -30,6 +44,9 @@ export interface CreateAccountRequest {
   tradeName?: string;
   legalName?: string;
   imageUrl?: string;
+  category?: string;
+  address?: string; // Deprecated: use addressDTO
+  addressDTO?: AddressDTO; // New structured address
 }
 
 export interface AccountMetrics {
@@ -49,7 +66,7 @@ export class AccountService {
   constructor(private apiService: ApiService) { }
 
   createAccount(request: CreateAccountRequest): Observable<Account> {
-    return this.apiService.post<Account>('/accounts', {
+    const payload: any = {
       companyName: request.companyName,
       adminName: request.adminName,
       email: request.email,
@@ -61,8 +78,22 @@ export class AccountService {
       documentNumber: request.documentNumber,
       tradeName: request.tradeName,
       legalName: request.legalName,
-      imageUrl: request.imageUrl
-    });
+      imageUrl: request.imageUrl,
+      category: request.category
+    };
+    
+    // Prefer structured addressDTO over string address
+    if (request.addressDTO) {
+      payload.addressDTO = request.addressDTO;
+    } else if (request.address) {
+      payload.address = request.address;
+    }
+    
+    return this.apiService.post<Account>('/accounts', payload);
+  }
+
+  getMyAccount(): Observable<Account> {
+    return this.apiService.get<Account>('/accounts/my-account');
   }
 
   getAllAccounts(): Observable<Account[]> {
@@ -71,6 +102,10 @@ export class AccountService {
 
   getAccountById(id: string): Observable<Account> {
     return this.apiService.get<Account>(`/accounts/${id}`);
+  }
+
+  updateAccount(id: string, data: Partial<Account>): Observable<Account> {
+    return this.apiService.put<Account>(`/accounts/${id}`, data);
   }
 
   activateAccount(id: string): Observable<Account> {

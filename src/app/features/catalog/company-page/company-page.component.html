@@ -1,0 +1,268 @@
+<div class="min-h-screen bg-background pb-20">
+  <app-marketplace-navbar></app-marketplace-navbar>
+
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" tabindex="-1" role="main">
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="space-y-6" aria-busy="true" aria-live="polite">
+      <app-skeleton-loader type="card"></app-skeleton-loader>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <app-skeleton-loader *ngFor="let i of [1,2,3]" type="card"></app-skeleton-loader>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error && !loading" class="bg-error/5 border border-error/20 rounded-large p-6 mb-6 flex items-start gap-4">
+      <svg class="w-6 h-6 text-error flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div>
+        <h3 class="text-lg font-semibold text-error-dark">Erro ao carregar empresa</h3>
+        <p class="text-error-dark/80">{{ error }}</p>
+        <app-button variant="outline" size="sm" label="Tentar Novamente" (clicked)="loadCompany()" customClass="mt-2"></app-button>
+      </div>
+    </div>
+
+    <!-- Company Details -->
+    <div *ngIf="company && !loading" class="animate-fade-in">
+      
+      <!-- Hero Banner -->
+      <div class="relative h-64 md:h-80 rounded-large overflow-hidden shadow-elevation-3 mb-8 group">
+        <!-- Background Image/Gradient -->
+        <div class="absolute inset-0 transition-transform duration-700 group-hover:scale-105" [ngStyle]="getCompanyBannerStyle()">
+          <img *ngIf="company.image_url && !companyAppearance?.bannerImageUrl" 
+               [appLazyLoad]="getImageUrl(company.image_url)" 
+               [alt]="company.company_name"
+               (error)="onImageError($event)"
+               class="w-full h-full object-cover">
+          
+          <!-- Fallback Initials -->
+          <div *ngIf="!company.image_url && !companyAppearance?.bannerImageUrl" 
+               class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary to-secondary">
+            <div class="text-white text-[120px] font-display font-bold opacity-20 select-none">
+              {{ company.company_name.charAt(0).toUpperCase() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Overlay Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+
+        <!-- Content -->
+        <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-end justify-between gap-4">
+          <div>
+            <div class="flex flex-wrap gap-2 mb-3">
+              <app-badge *ngIf="company.category" variant="primary" size="md" [label]="company.category"></app-badge>
+              <app-badge *ngIf="company.hasSubscriptionClub" variant="accent" size="md" label="Clube VIP"></app-badge>
+            </div>
+            <h1 class="text-3xl md:text-5xl font-display font-bold text-white mb-2 tracking-tight shadow-sm">
+              {{ company.company_name }}
+            </h1>
+            <p *ngIf="companyAppearance?.tagline" class="text-lg text-white/90 font-medium max-w-2xl shadow-sm">
+              {{ companyAppearance?.tagline }}
+            </p>
+          </div>
+          
+          <!-- Info Cards (Overlay) -->
+          <div class="flex gap-3">
+             <div *ngIf="company.phone" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-4 py-2 flex items-center gap-2 text-white">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+               <span class="text-sm font-medium">{{ formatPhone(company.phone) }}</span>
+             </div>
+             <div *ngIf="company.address" class="hidden md:flex bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-4 py-2 items-center gap-2 text-white max-w-xs truncate">
+               <app-map-pin-icon size="sm" variant="filled" color="text-white"></app-map-pin-icon>
+               <span class="text-sm font-medium truncate">{{ company.address }}</span>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="mb-8 border-b border-gray-200 sticky top-16 z-10 bg-background/95 backdrop-blur-sm pt-2">
+        <div class="flex space-x-1 overflow-x-auto pb-1 scrollbar-hide">
+          <button *ngFor="let tab of tabs" 
+                  (click)="selectTab(tab.id)"
+                  [class.text-primary]="activeTab === tab.id"
+                  [class.border-primary]="activeTab === tab.id"
+                  [class.text-gray-500]="activeTab !== tab.id"
+                  [class.border-transparent]="activeTab !== tab.id"
+                  class="flex items-center gap-2 px-6 py-3 border-b-2 font-medium text-lg transition-all whitespace-nowrap hover:text-primary focus:outline-none">
+            {{ tab.label }}
+            <span *ngIf="tab.count > 0" 
+                  [class.bg-primary]="activeTab === tab.id"
+                  [class.text-white]="activeTab === tab.id"
+                  [class.bg-gray-100]="activeTab !== tab.id"
+                  [class.text-gray-600]="activeTab !== tab.id"
+                  class="px-2 py-0.5 rounded-full text-xs font-bold transition-colors">
+              {{ tab.count }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Products -->
+      <div *ngIf="activeTab === 'products'" class="space-y-6 animate-fade-in">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 class="text-2xl font-display font-bold text-gray-900">Catálogo de Produtos</h2>
+            <p class="text-body text-gray-600">Explore e adicione itens ao seu carrinho</p>
+          </div>
+          <app-button 
+            *ngIf="hasSelectedProducts()" 
+            variant="primary"
+            size="lg"
+            [label]="'Ver Carrinho (' + getSelectedItemsCount() + ')'"
+            icon="shopping-cart"
+            (clicked)="goToCartReview()"
+            class="w-full md:w-auto shadow-lg shadow-primary/20">
+          </app-button>
+        </div>
+
+        <div *ngIf="loadingProducts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <app-skeleton-loader *ngFor="let i of [1,2,3,4,5,6]" type="card"></app-skeleton-loader>
+        </div>
+
+        <app-empty-state 
+          *ngIf="!loadingProducts && (!products || products.length === 0)"
+          title="Nenhum produto disponível"
+          message="Esta empresa ainda não cadastrou produtos. Volte mais tarde!"
+          icon="shopping-bag">
+        </app-empty-state>
+
+        <div *ngIf="!loadingProducts && products && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <app-product-card 
+            *ngFor="let product of products"
+            [product]="convertProductToCardData(product)"
+            [accountId]="companyId || undefined"
+            (addToCart)="onProductAddToCart($event)"
+            (viewDetails)="goToProductDetails($event)">
+          </app-product-card>
+        </div>
+      </div>
+
+      <!-- Tab Content: Clubs -->
+      <div *ngIf="activeTab === 'clubs'" class="space-y-6 animate-fade-in">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <h2 class="text-2xl font-display font-bold text-gray-900">Clubes de Assinatura VIP</h2>
+          <p class="text-body text-gray-600">Assine e receba produtos com recorrência e descontos exclusivos</p>
+        </div>
+
+        <div *ngIf="loadingClubs" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <app-skeleton-loader *ngFor="let i of [1,2]" type="card"></app-skeleton-loader>
+        </div>
+
+        <app-empty-state 
+          *ngIf="!loadingClubs && (!subscriptionClubs || subscriptionClubs.length === 0)"
+          title="Nenhum clube ativo"
+          message="Esta empresa não possui clubes de assinatura no momento."
+          icon="star">
+        </app-empty-state>
+
+        <div *ngIf="!loadingClubs && subscriptionClubs.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <app-card *ngFor="let club of subscriptionClubs" 
+                    variant="default" 
+                    [elevation]="2" 
+                    padding="none"
+                    class="overflow-hidden border-2 border-accent/20 hover:border-accent transition-all hover:shadow-elevation-2">
+            <div class="bg-gradient-to-br from-accent/10 to-accent/5 p-8 text-center">
+              <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+                <svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </div>
+              <h3 class="text-2xl font-display font-bold text-gray-900 mb-2">{{ club.name }}</h3>
+              <p class="text-body text-gray-600">{{ club.description }}</p>
+            </div>
+            
+            <div class="p-6 space-y-4">
+              <div class="space-y-3">
+                <div *ngFor="let benefit of club.benefits" class="flex items-center gap-3 text-gray-700">
+                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-success/10 flex items-center justify-center">
+                    <svg class="w-3 h-3 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <span class="text-body-sm font-medium">{{ benefit }}</span>
+                </div>
+              </div>
+              
+              <div class="pt-6 border-t border-gray-100 flex items-center justify-between gap-4">
+                <div>
+                  <p class="text-caption text-gray-500 uppercase tracking-wider font-bold">Mensalidade</p>
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-3xl font-display font-bold text-primary">{{ formatCurrencyFromReais(club.monthlyFee) }}</span>
+                    <span class="text-body-sm text-gray-500">/mês</span>
+                  </div>
+                </div>
+                <app-button variant="primary" label="Assinar Agora" (clicked)="subscribeToClub(club)"></app-button>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+
+      <!-- Tab Content: Promotions -->
+      <div *ngIf="activeTab === 'promotions'" class="space-y-6 animate-fade-in">
+        <div class="text-center max-w-2xl mx-auto mb-8">
+          <h2 class="text-2xl font-display font-bold text-gray-900">Cupons e Ofertas</h2>
+          <p class="text-body text-gray-600">Aproveite descontos exclusivos para sua próxima compra</p>
+        </div>
+
+        <div *ngIf="loadingPromotions" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <app-skeleton-loader *ngFor="let i of [1,2]" type="card"></app-skeleton-loader>
+        </div>
+
+        <app-empty-state 
+          *ngIf="!loadingPromotions && (!promotions || promotions.length === 0)"
+          title="Sem promoções ativas"
+          message="Fique ligado! Em breve novas ofertas aparecerão aqui."
+          icon="ticket">
+        </app-empty-state>
+
+        <div *ngIf="!loadingPromotions && promotions && promotions.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <app-card *ngFor="let promotion of promotions" 
+                    variant="default" 
+                    [elevation]="1" 
+                    padding="none"
+                    class="relative overflow-hidden group hover:shadow-elevation-2 transition-all">
+            <!-- Coupon Edge Design (Top) -->
+            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary to-secondary"></div>
+            
+            <div class="p-6">
+              <div class="flex justify-between items-start mb-4">
+                <div class="w-12 h-12 bg-primary/5 rounded-lg flex items-center justify-center text-primary">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/></svg>
+                </div>
+                <app-badge variant="error" size="lg" 
+                           [label]="promotion.discount_type === 'PERCENTAGE' ? '-' + promotion.discount_value + '%' : '-R$ ' + promotion.discount_value.toFixed(2)">
+                </app-badge>
+              </div>
+              
+              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ promotion.name }}</h3>
+              <p *ngIf="promotion.description" class="text-body-sm text-gray-600 mb-4 line-clamp-2">{{ promotion.description }}</p>
+              
+              <div class="space-y-2 mb-6 text-body-sm text-gray-500 bg-gray-50 p-3 rounded-md">
+                <div class="flex justify-between">
+                  <span>Válido até:</span>
+                  <span class="font-medium text-gray-900">{{ formatDate(promotion.end_date) }}</span>
+                </div>
+                <div *ngIf="promotion.min_purchase_amount" class="flex justify-between">
+                  <span>Mínimo:</span>
+                  <span class="font-medium text-gray-900">{{ formatCurrency(promotion.min_purchase_amount) }}</span>
+                </div>
+              </div>
+
+              <div class="relative">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 flex justify-between items-center bg-white group-hover:border-primary/30 transition-colors">
+                  <span class="font-mono font-bold text-lg text-gray-800 tracking-wider">{{ promotion.code }}</span>
+                  <button (click)="applyPromotion(promotion)" 
+                          class="text-primary font-medium text-sm hover:text-primary-dark focus:outline-none">
+                    COPIAR
+                  </button>
+                </div>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+

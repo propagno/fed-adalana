@@ -26,6 +26,16 @@ export const customerRoutes: Routes = [
     path: 'profile',
     loadComponent: () => import('./customer-profile/customer-profile.component').then(m => m.CustomerProfileComponent),
     canActivate: [customerGuard]
+  },
+  {
+    path: 'notifications',
+    loadComponent: () => import('./customer-notifications/customer-notifications.component').then(m => m.CustomerNotificationsComponent),
+    canActivate: [customerGuard]
+  },
+  {
+    path: 'my-club-subscription',
+    loadComponent: () => import('./my-club-subscription/my-club-subscription.component').then(m => m.MyClubSubscriptionComponent),
+    canActivate: [customerGuard]
   }
 ];
 

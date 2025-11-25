@@ -27,15 +27,15 @@
     </div>
     <div class="summary-card">
       <h3>Valor Total</h3>
-      <p class="summary-value">{{ summary.total_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+      <p class="summary-value">{{ summary.total_amount || 0 | currency:(summary.currency || 'BRL'):'symbol':'1.2-2' }}</p>
     </div>
     <div class="summary-card">
       <h3>Recebido</h3>
-      <p class="summary-value collected">{{ summary.collected_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+      <p class="summary-value collected">{{ summary.collected_amount || 0 | currency:(summary.currency || 'BRL'):'symbol':'1.2-2' }}</p>
     </div>
     <div class="summary-card">
       <h3>Pendente</h3>
-      <p class="summary-value pending-amount">{{ summary.pending_amount | currency:summary.currency:'symbol':'1.2-2' }}</p>
+      <p class="summary-value pending-amount">{{ summary.pending_amount || 0 | currency:(summary.currency || 'BRL'):'symbol':'1.2-2' }}</p>
     </div>
   </div>
 
@@ -68,7 +68,7 @@
           <strong>Telefone:</strong> {{ delivery.customer_phone }}
         </p>
         <p class="amount">
-          <strong>Valor:</strong> {{ delivery.total_amount | currency:delivery.currency:'symbol':'1.2-2' }}
+          <strong>Valor:</strong> {{ formatCurrency(delivery.total_amount) }}
         </p>
         <p class="payment-status" [ngClass]="getPaymentStatusClass(delivery.payment_status)">
           <strong>Pagamento:</strong> {{ delivery.payment_status }}
@@ -80,7 +80,7 @@
         <ul>
           <li *ngFor="let item of delivery.items">
             {{ item.product_name }} - Qtd: {{ item.quantity }} - 
-            {{ item.total_price | currency:delivery.currency:'symbol':'1.2-2' }}
+            {{ formatCurrency(item.total_price) }}
           </li>
         </ul>
       </div>

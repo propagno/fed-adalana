@@ -1,0 +1,188 @@
+<div class="min-h-screen bg-background">
+  <app-marketplace-navbar></app-marketplace-navbar>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+      <h1 class="text-h1 font-display text-primary">Meus Pedidos</h1>
+      <p class="text-body-lg text-gray-600 mt-2">Acompanhe o histórico e status das suas entregas</p>
+    </div>
+
+    <div *ngIf="loading" class="space-y-6">
+      <app-skeleton-loader *ngFor="let i of [1,2,3]" type="card"></app-skeleton-loader>
+    </div>
+
+    <app-empty-state *ngIf="!loading && orders.length === 0"
+                     title="Nenhum Pedido"
+                     message="Você ainda não possui pedidos. Quando você fizer um pedido, ele aparecerá aqui."
+                     [actionLabel]="'Explorar Catálogo'"
+                     [actionHandler]="goToCatalog.bind(this)">
+    </app-empty-state>
+
+    <div *ngIf="!loading && orders.length > 0" class="space-y-6">
+      <app-card *ngFor="let order of orders" 
+                variant="interactive"
+                [elevation]="1"
+                padding="lg">
+        <div class="mb-4">
+          <div class="flex items-start justify-between mb-2">
+            <div>
+              <h3 class="text-h3 font-display text-primary mb-1">
+                {{ order?.product_name || 'Produto' }}
+              </h3>
+              <p class="text-body-sm text-gray-500 mb-1">
+                Pedido {{ getOrderDisplayNumber(order) }}
+              </p>
+              <p *ngIf="order?.account_name" class="text-body-sm text-gray-600 font-medium">
+                Empresa: {{ order?.account_name }}
+              </p>
+            </div>
+            <app-badge 
+              [variant]="getStatusBadgeVariant(order?.status)"
+              size="md"
+              [label]="getStatusLabel(order?.status)">
+            </app-badge>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+          <div class="p-4 bg-gray-50 rounded-large">
+            <p class="text-body-sm text-gray-600 mb-1">Quantidade</p>
+            <p class="text-h4 font-semibold text-primary">{{ order?.quantity || '-' }}</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-large">
+            <p class="text-body-sm text-gray-600 mb-1">Data de Entrega</p>
+            <p class="text-h4 font-semibold text-primary">{{ formatDate(order?.delivery_date) }}</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-large">
+            <p class="text-body-sm text-gray-600 mb-1">Valor</p>
+            <p class="text-h4 font-semibold text-primary-light">{{ formatCurrency(order?.amount) }}</p>
+          </div>
+          <div class="p-4 bg-gray-50 rounded-large">
+            <p class="text-body-sm text-gray-600 mb-1">Pagamento</p>
+            <p class="text-body font-semibold text-primary">{{ getPaymentStatusLabel(order?.payment_status) }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="order?.delivery_address" class="mb-4 p-4 bg-gray-50 rounded-large">
+          <p class="text-body-sm font-medium text-primary mb-1">Endereço de Entrega</p>
+          <p class="text-body text-gray-900">{{ order?.delivery_address }}</p>
+        </div>
+
+        <div *ngIf="order?.acceptance_status" class="mb-4 p-4 rounded-large"
+             [ngClass]="order?.acceptance_status === 'accepted' ? 'bg-success/10 border-l-4 border-success' : (order?.acceptance_status === 'pending' ? 'bg-warning/10 border-l-4 border-warning' : 'bg-error/10 border-l-4 border-error')">
+          <p class="text-body-sm font-medium text-primary mb-1">Status da Empresa</p>
+          <p class="text-body text-gray-900">
+            <span *ngIf="order?.acceptance_status === 'accepted'">✓ Pedido aceito pela empresa</span>
+            <span *ngIf="order?.acceptance_status === 'pending'">⏳ Aguardando confirmação da empresa</span>
+            <span *ngIf="order?.acceptance_status === 'rejected'">✗ Pedido rejeitado pela empresa</span>
+            <span *ngIf="order?.acceptance_status === 'cancelled_by_company'">✗ Pedido cancelado pela empresa</span>
+          </p>
+        </div>
+
+        <div *ngIf="order?.rejection_reason" class="mb-4 p-4 bg-error/10 border-l-4 border-error rounded-large">
+          <p class="text-body-sm font-medium text-primary mb-1">Motivo da Rejeição</p>
+          <p class="text-body-sm text-gray-600">{{ order?.rejection_reason }}</p>
+        </div>
+
+        <div *ngIf="order?.cancellation_reason" class="mb-4 p-4 bg-warning/10 border-l-4 border-warning rounded-large">
+          <p class="text-body-sm font-medium text-primary mb-1">Motivo do Cancelamento</p>
+          <p class="text-body-sm text-gray-600">{{ order?.cancellation_reason }}</p>
+        </div>
+
+        <div *ngIf="order?.cancellation_requested_by_customer" class="mb-4 p-4 bg-info/10 border-l-4 border-info rounded-large">
+          <p class="text-body-sm font-medium text-primary mb-1">Solicitação de Cancelamento</p>
+          <p class="text-body-sm text-gray-600 mb-2">
+            Status: <strong>{{ getCancellationRequestStatusLabel(order?.cancellation_request_status) }}</strong>
+          </p>
+          <p *ngIf="order?.cancellation_request_reason" class="text-body-sm text-gray-500">
+            Motivo: {{ order?.cancellation_request_reason }}
+          </p>
+        </div>
+
+        <div *ngIf="order && canRequestCancellation(order)" class="mt-4 pt-4 border-t border-gray-200">
+          <app-button 
+            variant="outline"
+            size="md"
+            label="Solicitar Cancelamento"
+            (clicked)="order && openCancellationRequestModal(order)"
+            [fullWidth]="true">
+          </app-button>
+        </div>
+
+        <div *ngIf="order && order.status === 'delivered'" class="mt-4 pt-4 border-t border-gray-200">
+          <app-button 
+            variant="secondary"
+            size="md"
+            label="Reordenar"
+            (clicked)="order && reorder(order)"
+            [fullWidth]="true">
+          </app-button>
+        </div>
+      </app-card>
+    </div>
+  </div>
+</div>
+
+<!-- Request Cancellation Modal -->
+<div *ngIf="showCancellationRequestModal" 
+     class="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/50 p-0 md:p-4"
+     (click)="showCancellationRequestModal = false"
+     role="dialog"
+     aria-modal="true">
+  <div class="bg-white rounded-t-3xl md:rounded-large shadow-lg w-full md:max-w-md md:max-h-[90vh] overflow-y-auto"
+       (click)="$event.stopPropagation()">
+    <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <h2 class="text-h2 font-display text-primary">Solicitar Cancelamento</h2>
+      <button 
+        (click)="showCancellationRequestModal = false"
+        aria-label="Fechar modal"
+        class="text-gray-400 hover:text-gray-600 transition-colors p-2 -mr-2">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <div class="p-6">
+      <p class="text-body text-gray-600 mb-6">
+        Por favor, informe o motivo do cancelamento do pedido <strong>{{ getSelectedOrderDisplay() }}</strong>:
+      </p>
+      <div class="mb-6">
+        <label class="block text-body-sm font-medium text-gray-700 mb-2">
+          Motivo do Cancelamento <span class="text-error">*</span>
+        </label>
+        <textarea
+          [(ngModel)]="cancellationRequestReason"
+          class="w-full p-3 border border-gray-300 rounded-medium focus:ring-2 focus:ring-primary focus:border-transparent min-h-[120px] text-body"
+          placeholder="Descreva o motivo do cancelamento (mínimo 10 caracteres)"
+          [maxlength]="500"
+          rows="4">
+        </textarea>
+        <p class="text-body-xs text-gray-500 mt-1">
+          {{ cancellationRequestReason.length }}/500 caracteres
+          <span *ngIf="cancellationRequestReason.length < 10" class="text-warning ml-2">
+            (mínimo 10 caracteres)
+          </span>
+        </p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <app-button 
+          variant="ghost"
+          size="md"
+          label="Cancelar"
+          (clicked)="showCancellationRequestModal = false"
+          [fullWidth]="true">
+        </app-button>
+        <app-button 
+          variant="primary"
+          size="md"
+          label="Enviar Solicitação"
+          (clicked)="requestCancellation()"
+          [disabled]="cancellationRequestReason.length < 10"
+          [loading]="loadingCancellation"
+          [fullWidth]="true">
+        </app-button>
+      </div>
+    </div>
+  </div>
+</div>

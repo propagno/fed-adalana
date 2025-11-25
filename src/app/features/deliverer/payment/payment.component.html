@@ -12,25 +12,25 @@
   <div *ngIf="delivery && !loading" class="payment-content">
     <header class="payment-header">
       <h1>Registrar Pagamento</h1>
-      <p class="customer-name">{{ delivery.customer_name }}</p>
+      <p class="customer-name">{{ getCustomerName() }}</p>
     </header>
 
     <div class="payment-summary">
       <div class="summary-item">
         <span class="label">Valor Total:</span>
-        <span class="value">{{ delivery.total_amount | currency:delivery.currency:'symbol':'1.2-2' }}</span>
+        <span class="value">{{ delivery.total_amount | currency:getCurrency():'symbol':'1.2-2' }}</span>
       </div>
       <div class="summary-item">
         <span class="label">Valor Informado:</span>
-        <span class="value">{{ getAmountInReais() | currency:delivery.currency:'symbol':'1.2-2' }}</span>
+        <span class="value">{{ getAmountInReais() | currency:getCurrency():'symbol':'1.2-2' }}</span>
       </div>
       <div class="summary-item" *ngIf="getPendingAmount() > 0">
         <span class="label">Pendente:</span>
-        <span class="value pending">{{ getPendingAmount() | currency:delivery.currency:'symbol':'1.2-2' }}</span>
+        <span class="value pending">{{ getPendingAmount() | currency:getCurrency():'symbol':'1.2-2' }}</span>
       </div>
       <div class="summary-item" *ngIf="getPendingAmount() < 0">
         <span class="label">Troco:</span>
-        <span class="value change">{{ -getPendingAmount() | currency:delivery.currency:'symbol':'1.2-2' }}</span>
+        <span class="value change">{{ -getPendingAmount() | currency:getCurrency():'symbol':'1.2-2' }}</span>
       </div>
     </div>
 
@@ -45,7 +45,7 @@
       </div>
 
       <div class="form-group">
-        <label for="amount">Valor Recebido ({{ delivery.currency }}) *</label>
+        <label for="amount">Valor Recebido ({{ getCurrency() }}) *</label>
         <input 
           type="number" 
           id="amount" 
@@ -56,7 +56,7 @@
           step="0.01"
           min="0"
           required>
-        <small>Digite o valor em {{ delivery.currency }}</small>
+        <small>Digite o valor em {{ getCurrency() }}</small>
       </div>
 
       <div class="form-group" *ngIf="paymentMethod === 'pix'">

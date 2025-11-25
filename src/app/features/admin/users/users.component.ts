@@ -3,130 +3,41 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserService, User, CreateUserRequest, UpdateUserRoleRequest } from '../../../core/services/user.service';
 import { FormatUtil } from '../../../shared/utils/format.util';
+import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { PageHeaderComponent } from '../../../shared/components/design-system/page-header/page-header.component';
+import { DataListComponent } from '../../../shared/components/design-system/data-list/data-list.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { CardComponent } from '../../../shared/components/design-system/card/card.component';
+import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
+import { BadgeComponent } from '../../../shared/components/design-system/badge/badge.component';
 
 @Component({
   selector: 'app-users',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div>
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900">Usuários</h2>
-          <p class="text-sm text-gray-600 mt-1">Gerencie operadores e entregadores</p>
-        </div>
-        <button (click)="showCreateForm = !showCreateForm" class="btn-primary">
-          {{ showCreateForm ? 'Cancelar' : '+ Novo Usuário' }}
-        </button>
-      </div>
-
-      <div *ngIf="showCreateForm" class="card mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingUser ? 'Editar Usuário' : 'Novo Usuário' }}
-        </h3>
-        <form (ngSubmit)="saveUser()" #userForm="ngForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="label">Nome *</label>
-              <input [(ngModel)]="userFormData.name" name="name" required class="input">
-            </div>
-            <div>
-              <label class="label">Email *</label>
-              <input type="email" [(ngModel)]="userFormData.email" name="email" required class="input">
-            </div>
-            <div *ngIf="!editingUser">
-              <label class="label">Senha *</label>
-              <input type="password" [(ngModel)]="userFormData.password" name="password" 
-                     required minlength="8" class="input">
-              <p class="mt-1 text-xs text-gray-500">Mínimo 8 caracteres</p>
-            </div>
-            <div>
-              <label class="label">Telefone</label>
-              <input [(ngModel)]="userFormData.phone" name="phone" class="input">
-            </div>
-            <div>
-              <label class="label">Função *</label>
-              <select [(ngModel)]="userFormData.role" name="role" required class="input">
-                <option value="operator">Operador</option>
-                <option value="deliverer">Entregador</option>
-              </select>
-            </div>
-          </div>
-          <div class="flex justify-end gap-3 pt-4">
-            <button type="button" (click)="cancelForm()" class="btn-secondary">Cancelar</button>
-            <button type="submit" [disabled]="saving" class="btn-primary">
-              {{ saving ? 'Salvando...' : (editingUser ? 'Atualizar' : 'Criar') }}
-            </button>
-          </div>
-          <div *ngIf="error" class="mt-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
-            {{ error }}
-          </div>
-        </form>
-      </div>
-
-      <div class="card">
-        <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando usuários...</div>
-        <div *ngIf="users && !loading">
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Função</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="bg-surface divide-y divide-gray-200">
-                <tr *ngFor="let user of users" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ user.name }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ user.email }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ user.phone || '-' }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="badge-info">{{ getRoleLabel(user.role) }}</span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span [class]="user.active ? 'badge-success' : 'badge-error'">
-                      {{ user.active ? 'Ativo' : 'Inativo' }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button (click)="editUser(user)" class="text-primary hover:text-primary-dark mr-3">
-                      Editar
-                    </button>
-                    <button (click)="toggleUserStatus(user)" 
-                            [class]="user.active ? 'text-warning hover:text-warning-dark' : 'text-success hover:text-success-dark'">
-                      {{ user.active ? 'Desativar' : 'Ativar' }}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="users.length === 0" class="text-center py-8 text-gray-500">
-            Nenhum usuário cadastrado
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [
+    CommonModule,
+    FormsModule,
+    PageHeaderComponent,
+    DataListComponent,
+    ModalComponent,
+    CardComponent,
+    ButtonComponent,
+    BadgeComponent
+  ],
+  templateUrl: './users.component.html',
   styles: []
 })
 export class UsersComponent implements OnInit {
   users: User[] = [];
+  filteredUsers: User[] = [];
   loading = false;
   saving = false;
   showCreateForm = false;
   editingUser: User | null = null;
   error: string | null = null;
+  searchTerm = '';
+  roleFilter: 'all' | 'operator' | 'deliverer' = 'all';
 
   userFormData: CreateUserRequest = {
     name: '',
@@ -136,7 +47,11 @@ export class UsersComponent implements OnInit {
     phone: undefined
   };
 
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -147,14 +62,44 @@ export class UsersComponent implements OnInit {
     this.userService.getUsers().subscribe({
       next: (users) => {
         this.users = users;
+        this.applySearch();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading users', err);
+        this.toastService.error('Erro ao carregar usuários');
         this.error = 'Erro ao carregar usuários';
         this.loading = false;
       }
     });
+  }
+
+  applySearch(): void {
+    let filtered = this.users;
+
+    // Apply role filter
+    if (this.roleFilter === 'operator') {
+      filtered = filtered.filter(u => u.role === 'operator');
+    } else if (this.roleFilter === 'deliverer') {
+      filtered = filtered.filter(u => u.role === 'deliverer');
+    }
+
+    // Apply search term
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(u => 
+        (u.name && u.name.toLowerCase().includes(term)) ||
+        (u.email && u.email.toLowerCase().includes(term)) ||
+        (u.phone && u.phone.toLowerCase().includes(term))
+      );
+    }
+
+    this.filteredUsers = filtered;
+  }
+
+  setRoleFilter(filter: 'all' | 'operator' | 'deliverer'): void {
+    this.roleFilter = filter;
+    this.applySearch();
   }
 
   saveUser(): void {
@@ -174,11 +119,13 @@ export class UsersComponent implements OnInit {
       this.userService.updateUserRole(this.editingUser.id, updateData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Usuário atualizado com sucesso!');
           this.cancelForm();
           this.loadUsers();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao atualizar usuário');
           this.error = err.error?.message || 'Erro ao atualizar usuário';
         }
       });
@@ -186,11 +133,13 @@ export class UsersComponent implements OnInit {
       this.userService.createUser(this.userFormData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Usuário criado com sucesso!');
           this.cancelForm();
           this.loadUsers();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao criar usuário');
           this.error = err.error?.message || 'Erro ao criar usuário';
         }
       });
@@ -210,16 +159,29 @@ export class UsersComponent implements OnInit {
   }
 
   toggleUserStatus(user: User): void {
-    const action = user.active
-      ? this.userService.deactivateUser(user.id)
-      : this.userService.activateUser(user.id);
+    const action = user.active ? 'desativar' : 'ativar';
+    this.confirmationService.confirm({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Usuário`,
+      message: `Tem certeza que deseja ${action} o usuário ${user.name}?`,
+      confirmLabel: action.charAt(0).toUpperCase() + action.slice(1),
+      cancelLabel: 'Cancelar',
+      confirmVariant: user.active ? 'warning' : 'primary'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        const serviceAction = user.active
+          ? this.userService.deactivateUser(user.id)
+          : this.userService.activateUser(user.id);
 
-    action.subscribe({
-      next: () => {
-        this.loadUsers();
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Erro ao alterar status do usuário';
+        serviceAction.subscribe({
+          next: () => {
+            this.toastService.success(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`);
+            this.loadUsers();
+          },
+          error: (err) => {
+            this.toastService.error(err.error?.message || `Erro ao ${action} usuário`);
+            this.error = err.error?.message || `Erro ao ${action} usuário`;
+          }
+        });
       }
     });
   }

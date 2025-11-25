@@ -1,23 +1,20 @@
 import { Routes } from '@angular/router';
-import { DelivererDashboardComponent } from './deliverer-dashboard/deliverer-dashboard.component';
-import { DeliveryDetailComponent } from './delivery-detail/delivery-detail.component';
-import { PaymentComponent } from './payment/payment.component';
 import { delivererGuard } from '../../core/guards/deliverer.guard';
 
 export const delivererRoutes: Routes = [
   {
     path: '',
-    component: DelivererDashboardComponent,
+    loadComponent: () => import('./deliverer-dashboard/deliverer-dashboard.component').then(m => m.DelivererDashboardComponent),
     canActivate: [delivererGuard]
   },
   {
     path: 'delivery/:id',
-    component: DeliveryDetailComponent,
+    loadComponent: () => import('./delivery-detail/delivery-detail.component').then(m => m.DeliveryDetailComponent),
     canActivate: [delivererGuard]
   },
   {
     path: 'payment/:id',
-    component: PaymentComponent,
+    loadComponent: () => import('./payment/payment.component').then(m => m.PaymentComponent),
     canActivate: [delivererGuard]
   }
 ];

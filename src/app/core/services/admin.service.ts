@@ -84,4 +84,12 @@ export class AdminService {
   getUpcomingDeliveries(days: number = 7): Observable<any> {
     return this.apiService.get<any>('/reports/upcoming-deliveries', { days });
   }
+
+  getCustomerMetrics(startDate: string, endDate: string): Observable<any> {
+    return this.apiService.get<any>('/reports/customer-metrics', { startDate, endDate });
+  }
+
+  getDeliveryPerformance(startDate: string, endDate: string): Observable<any> {
+    return this.apiService.get<any>('/reports/delivery-performance', { startDate, endDate });
+  }
 }

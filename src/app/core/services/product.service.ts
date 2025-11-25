@@ -54,6 +54,10 @@ export class ProductService {
     return this.apiService.get<Product>(`/products/${id}`);
   }
 
+  getProductsByAccount(accountId: string): Observable<Product[]> {
+    return this.apiService.get<Product[]>(`/accounts/${accountId}/products`);
+  }
+
   createProduct(data: CreateProductRequest): Observable<Product> {
     return this.apiService.post<Product>('/products', data);
   }

@@ -5,171 +5,32 @@ import { ProductService, Product, CreateProductRequest, UpdateProductRequest } f
 import { FileUploadService } from '../../../core/services/file-upload.service';
 import { FormatUtil } from '../../../shared/utils/format.util';
 import { environment } from '../../../../environments/environment';
+import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { ToastService } from '../../../shared/services/toast.service';
+import { PageHeaderComponent } from '../../../shared/components/design-system/page-header/page-header.component';
+import { DataListComponent } from '../../../shared/components/design-system/data-list/data-list.component';
+import { ModalComponent } from '../../../shared/components/modal/modal.component';
+import { CardComponent } from '../../../shared/components/design-system/card/card.component';
+import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
 
 @Component({
   selector: 'app-products',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div>
-      <!-- Header Actions -->
-      <div class="flex justify-between items-center mb-6">
-        <div>
-          <h2 class="text-2xl font-semibold text-gray-900">Produtos</h2>
-          <p class="text-sm text-gray-600 mt-1">Gerencie os produtos da sua empresa</p>
-        </div>
-        <button (click)="showCreateForm = !showCreateForm" class="btn-primary">
-          {{ showCreateForm ? 'Cancelar' : '+ Novo Produto' }}
-        </button>
-      </div>
-
-      <!-- Create Form -->
-      <div *ngIf="showCreateForm" class="card mb-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingProduct ? 'Editar Produto' : 'Novo Produto' }}
-        </h3>
-        <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="label">Nome *</label>
-              <input [(ngModel)]="productFormData.name" name="name" required class="input">
-            </div>
-            <div>
-              <label class="label">Código do Produto *</label>
-              <input [(ngModel)]="productFormData.sku" name="sku" required class="input" 
-                     pattern="^[A-Za-z0-9-_]+$"
-                     placeholder="Ex: PROD-001">
-            </div>
-            <div>
-              <label class="label">Preço (R$) *</label>
-              <input type="number" [(ngModel)]="productFormData.price" name="price" 
-                     required min="0" step="0.01" class="input">
-            </div>
-            <div>
-              <label class="label">Intervalo de Entrega *</label>
-              <select [(ngModel)]="productFormData.interval" name="interval" required class="input"
-                      (change)="onIntervalChange()">
-                <option value="daily">Diário</option>
-                <option value="weekly">Semanal</option>
-                <option value="biweekly">Quinzenal</option>
-                <option value="monthly">Mensal</option>
-                <option value="quarterly">Trimestral</option>
-                <option value="custom">Personalizado</option>
-              </select>
-            </div>
-            <div *ngIf="productFormData.interval === 'custom'">
-              <label class="label">Dias Personalizados *</label>
-              <input type="number" [(ngModel)]="productFormData.custom_interval_days" 
-                     name="custom_interval_days" required min="1" max="365" class="input">
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Informações Gerais</label>
-              <textarea [(ngModel)]="productFormData.description" name="description" 
-                        class="input" rows="4" placeholder="Descreva as características do produto..."></textarea>
-            </div>
-            <div>
-              <label class="label">Tipo de Unidade</label>
-              <input type="text" [(ngModel)]="productFormData.unit_type" name="unit_type" 
-                     class="input" placeholder="Ex: Placa com 30 ovos">
-            </div>
-            <div class="md:col-span-2">
-              <label class="label">Imagem do Produto</label>
-              <div class="space-y-3">
-                <input type="file" 
-                       #imageInput
-                       (change)="onImageSelected($event, imageInput)"
-                       accept="image/*"
-                       class="input">
-                <div *ngIf="productImagePreview" class="mt-3">
-                  <img [src]="productImagePreview" 
-                       alt="Preview" 
-                       class="w-32 h-32 object-cover rounded-lg border-2 border-gray-300">
-                  <button type="button" 
-                          (click)="removeImage()" 
-                          class="mt-2 text-sm text-red-600 hover:text-red-700">
-                    Remover imagem
-                  </button>
-                </div>
-                <div *ngIf="productFormData.image_url && !productImagePreview" class="mt-3">
-                  <p class="text-sm text-gray-600">Imagem atual:</p>
-                  <img [src]="getImageUrl(productFormData.image_url)" 
-                       alt="Current image" 
-                       class="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 mt-2">
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="flex justify-end gap-3 pt-4">
-            <button type="button" (click)="cancelForm()" class="btn-secondary">Cancelar</button>
-            <button type="submit" [disabled]="saving" class="btn-primary">
-              {{ saving ? 'Salvando...' : (editingProduct ? 'Atualizar' : 'Criar') }}
-            </button>
-          </div>
-          <div *ngIf="error" class="mt-4 p-3 bg-error/10 border border-error/20 rounded-lg text-error text-sm">
-            {{ error }}
-          </div>
-        </form>
-      </div>
-
-      <!-- Products List -->
-      <div class="card">
-        <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando produtos...</div>
-        <div *ngIf="products && !loading">
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Código</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Preço</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Intervalo</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="bg-surface divide-y divide-gray-200">
-                <tr *ngFor="let product of products" class="hover:bg-gray-50">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ product.sku }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ formatPrice(product.price || (product.price_cents ? product.price_cents / 100 : 0)) }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ getIntervalLabel(product.interval, product.custom_interval_days) }}</div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span [class]="product.active ? 'badge-success' : 'badge-error'">
-                      {{ product.active ? 'Ativo' : 'Inativo' }}
-                    </span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button (click)="editProduct(product)" class="text-primary hover:text-primary-dark mr-3">
-                      Editar
-                    </button>
-                    <button (click)="toggleProductStatus(product)" 
-                            [class]="product.active ? 'text-warning hover:text-warning-dark' : 'text-success hover:text-success-dark'">
-                      {{ product.active ? 'Desativar' : 'Ativar' }}
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div *ngIf="products.length === 0" class="text-center py-8 text-gray-500">
-            Nenhum produto cadastrado
-          </div>
-        </div>
-      </div>
-    </div>
-  `,
+  imports: [
+    CommonModule,
+    FormsModule,
+    PageHeaderComponent,
+    DataListComponent,
+    ModalComponent,
+    CardComponent,
+    ButtonComponent
+  ],
+  templateUrl: './products.component.html',
   styles: []
 })
 export class ProductsComponent implements OnInit {
   products: Product[] = [];
+  filteredProducts: Product[] = [];
   loading = false;
   saving = false;
   showCreateForm = false;
@@ -178,6 +39,8 @@ export class ProductsComponent implements OnInit {
   productImagePreview: string | null = null;
   selectedImageFile: File | null = null;
   uploadingImage = false;
+  searchTerm = '';
+  statusFilter: 'all' | 'active' | 'inactive' = 'all';
 
   productFormData: CreateProductRequest = {
     name: '',
@@ -191,7 +54,9 @@ export class ProductsComponent implements OnInit {
 
   constructor(
     private productService: ProductService,
-    private fileUploadService: FileUploadService
+    private fileUploadService: FileUploadService,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -203,14 +68,44 @@ export class ProductsComponent implements OnInit {
     this.productService.getProducts().subscribe({
       next: (products) => {
         this.products = products;
+        this.applySearch();
         this.loading = false;
       },
       error: (err) => {
         console.error('Error loading products', err);
+        this.toastService.error('Erro ao carregar produtos');
         this.error = 'Erro ao carregar produtos';
         this.loading = false;
       }
     });
+  }
+
+  applySearch(): void {
+    let filtered = this.products;
+
+    // Apply status filter
+    if (this.statusFilter === 'active') {
+      filtered = filtered.filter(p => p.active);
+    } else if (this.statusFilter === 'inactive') {
+      filtered = filtered.filter(p => !p.active);
+    }
+
+    // Apply search term
+    if (this.searchTerm && this.searchTerm.trim()) {
+      const term = this.searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(p => 
+        p.name.toLowerCase().includes(term) ||
+        (p.sku && p.sku.toLowerCase().includes(term)) ||
+        (p.description && p.description.toLowerCase().includes(term))
+      );
+    }
+
+    this.filteredProducts = filtered;
+  }
+
+  setStatusFilter(filter: 'all' | 'active' | 'inactive'): void {
+    this.statusFilter = filter;
+    this.applySearch();
   }
 
   async saveProduct(): Promise<void> {
@@ -266,11 +161,13 @@ export class ProductsComponent implements OnInit {
       this.productService.updateProduct(this.editingProduct.id, updateData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Produto atualizado com sucesso!');
           this.cancelForm();
           this.loadProducts();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao atualizar produto');
           this.error = err.error?.message || 'Erro ao atualizar produto';
         }
       });
@@ -278,11 +175,13 @@ export class ProductsComponent implements OnInit {
       this.productService.createProduct(this.productFormData).subscribe({
         next: () => {
           this.saving = false;
+          this.toastService.success('Produto criado com sucesso!');
           this.cancelForm();
           this.loadProducts();
         },
         error: (err) => {
           this.saving = false;
+          this.toastService.error(err.error?.message || 'Erro ao criar produto');
           this.error = err.error?.message || 'Erro ao criar produto';
         }
       });
@@ -307,16 +206,29 @@ export class ProductsComponent implements OnInit {
   }
 
   toggleProductStatus(product: Product): void {
-    const action = product.active
-      ? this.productService.deactivateProduct(product.id)
-      : this.productService.activateProduct(product.id);
+    const action = product.active ? 'desativar' : 'ativar';
+    this.confirmationService.confirm({
+      title: `${action.charAt(0).toUpperCase() + action.slice(1)} Produto`,
+      message: `Tem certeza que deseja ${action} o produto ${product.name}?`,
+      confirmLabel: action.charAt(0).toUpperCase() + action.slice(1),
+      cancelLabel: 'Cancelar',
+      confirmVariant: product.active ? 'warning' : 'primary'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        const serviceAction = product.active
+          ? this.productService.deactivateProduct(product.id)
+          : this.productService.activateProduct(product.id);
 
-    action.subscribe({
-      next: () => {
-        this.loadProducts();
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Erro ao alterar status do produto';
+        serviceAction.subscribe({
+          next: () => {
+            this.toastService.success(`Produto ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`);
+            this.loadProducts();
+          },
+          error: (err) => {
+            this.toastService.error(err.error?.message || `Erro ao ${action} produto`);
+            this.error = err.error?.message || `Erro ao ${action} produto`;
+          }
+        });
       }
     });
   }

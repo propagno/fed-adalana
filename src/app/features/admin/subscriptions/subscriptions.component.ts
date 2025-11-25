@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SubscriptionService, Subscription, UpdateSubscriptionRequest, PauseSubscriptionRequest } from '../../../core/services/subscription.service';
 import { FormatUtil } from '../../../shared/utils/format.util';
+import { ConfirmationService } from '../../../shared/services/confirmation.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-subscriptions',
@@ -120,7 +122,11 @@ export class SubscriptionsComponent implements OnInit {
     paused_until: undefined
   };
 
-  constructor(private subscriptionService: SubscriptionService) {}
+  constructor(
+    private subscriptionService: SubscriptionService,
+    private confirmationService: ConfirmationService,
+    private toastService: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.loadSubscriptions();
@@ -157,12 +163,14 @@ export class SubscriptionsComponent implements OnInit {
     this.subscriptionService.pauseSubscription(this.selectedSubscription.id, this.pauseFormData).subscribe({
       next: () => {
         this.saving = false;
+        this.toastService.success('Assinatura pausada com sucesso!');
         this.showPauseForm = false;
         this.selectedSubscription = null;
         this.loadSubscriptions();
       },
       error: (err) => {
         this.saving = false;
+        this.toastService.error(err.error?.message || 'Erro ao pausar assinatura');
         this.error = err.error?.message || 'Erro ao pausar assinatura';
       }
     });
@@ -170,27 +178,40 @@ export class SubscriptionsComponent implements OnInit {
 
   resumeSubscription(subscription: Subscription): void {
     this.subscriptionService.resumeSubscription(subscription.id).subscribe({
-      next: () => {
-        this.loadSubscriptions();
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Erro ao retomar assinatura';
-      }
+        next: () => {
+          this.toastService.success('Assinatura retomada com sucesso!');
+          this.loadSubscriptions();
+        },
+        error: (err) => {
+          this.toastService.error(err.error?.message || 'Erro ao retomar assinatura');
+          this.error = err.error?.message || 'Erro ao retomar assinatura';
+        }
     });
   }
 
   cancelSubscription(subscription: Subscription): void {
-    if (confirm('Tem certeza que deseja cancelar esta assinatura?')) {
-      const reason = prompt('Informe o motivo do cancelamento (opcional):') || undefined;
-      this.subscriptionService.cancelSubscription(subscription.id, reason).subscribe({
-        next: () => {
-          this.loadSubscriptions();
-        },
-        error: (err) => {
-          this.error = err.error?.message || 'Erro ao cancelar assinatura';
-        }
-      });
-    }
+    this.confirmationService.confirm({
+      title: 'Cancelar Assinatura',
+      message: 'Tem certeza que deseja cancelar esta assinatura?',
+      confirmLabel: 'Cancelar Assinatura',
+      cancelLabel: 'Manter Assinatura',
+      confirmVariant: 'danger'
+    }).subscribe(confirmed => {
+      if (confirmed) {
+        // For now, we'll skip the reason prompt. Can be enhanced with a custom modal later
+        const reason = undefined;
+        this.subscriptionService.cancelSubscription(subscription.id, reason).subscribe({
+          next: () => {
+            this.toastService.success('Assinatura cancelada com sucesso!');
+            this.loadSubscriptions();
+          },
+          error: (err) => {
+            this.toastService.error(err.error?.message || 'Erro ao cancelar assinatura');
+            this.error = err.error?.message || 'Erro ao cancelar assinatura';
+          }
+        });
+      }
+    });
   }
 
   formatDate(date: string): string {

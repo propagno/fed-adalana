@@ -1,0 +1,229 @@
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <app-page-header
+    title="Produtos"
+    description="Gerencie os produtos da sua empresa"
+    actionLabel="+ Novo Produto"
+    (action)="showCreateForm = true">
+  </app-page-header>
+
+  <app-data-list
+    [items]="filteredProducts"
+    [loading]="loading"
+    [showFilters]="true"
+    searchPlaceholder="Buscar por nome, código ou descrição..."
+    emptyTitle="Nenhum produto encontrado"
+    emptyMessage="Tente ajustar os filtros ou adicione um novo produto."
+    emptyActionLabel="+ Novo Produto"
+    (search)="searchTerm = $event; applySearch()"
+    (emptyAction)="showCreateForm = true">
+    
+    <!-- Filters -->
+    <div filters class="flex gap-2">
+      <app-button 
+        [variant]="statusFilter === 'all' ? 'primary' : 'outline'"
+        size="sm"
+        label="Todos"
+        (clicked)="setStatusFilter('all')">
+      </app-button>
+      <app-button 
+        [variant]="statusFilter === 'active' ? 'primary' : 'outline'"
+        size="sm"
+        label="Ativos"
+        (clicked)="setStatusFilter('active')">
+      </app-button>
+      <app-button 
+        [variant]="statusFilter === 'inactive' ? 'primary' : 'outline'"
+        size="sm"
+        label="Inativos"
+        (clicked)="setStatusFilter('inactive')">
+      </app-button>
+    </div>
+
+    <!-- Table Template -->
+    <ng-template #tableTemplate let-products>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Intervalo</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let product of products" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <div class="h-10 w-10 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
+                  <img *ngIf="product.image_url" [src]="getImageUrl(product.image_url)" class="h-full w-full object-cover">
+                  <div *ngIf="!product.image_url" class="h-full w-full flex items-center justify-center text-gray-400">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+                </div>
+                <div class="ml-4">
+                  <div class="text-sm font-medium text-gray-900">{{ product.name }}</div>
+                  <div class="text-sm text-gray-500">{{ product.sku }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ formatPrice(product.price || (product.price_cents ? product.price_cents / 100 : 0)) }}</div>
+              <div class="text-xs text-gray-500">{{ product.unit_type }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                {{ getIntervalLabel(product.interval, product.custom_interval_days) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span [class]="product.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                {{ product.active ? 'Ativo' : 'Inativo' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <button (click)="editProduct(product)" class="text-primary hover:text-primary-dark mr-4 transition-colors">Editar</button>
+              <button (click)="toggleProductStatus(product)" 
+                      [class]="product.active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
+                      class="transition-colors">
+                {{ product.active ? 'Desativar' : 'Ativar' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-template>
+
+    <!-- Card Template (Mobile) -->
+    <ng-template #cardTemplate let-product>
+      <app-card variant="default" [elevation]="1" padding="md">
+        <div class="flex items-start gap-4">
+          <div class="h-16 w-16 flex-shrink-0 rounded-lg bg-gray-100 overflow-hidden">
+            <img *ngIf="product.image_url" [src]="getImageUrl(product.image_url)" class="h-full w-full object-cover">
+            <div *ngIf="!product.image_url" class="h-full w-full flex items-center justify-center text-gray-400">
+              <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between">
+              <div>
+                <h3 class="text-lg font-medium text-gray-900 truncate">{{ product.name }}</h3>
+                <p class="text-sm text-gray-500">{{ product.sku }}</p>
+              </div>
+              <span [class]="product.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 inline-flex text-xs font-semibold rounded-full">
+                {{ product.active ? 'Ativo' : 'Inativo' }}
+              </span>
+            </div>
+            <div class="mt-2 flex justify-between items-end">
+              <div>
+                <p class="text-lg font-bold text-primary">{{ formatPrice(product.price || (product.price_cents ? product.price_cents / 100 : 0)) }}</p>
+                <p class="text-xs text-gray-500">{{ getIntervalLabel(product.interval, product.custom_interval_days) }}</p>
+              </div>
+              <div class="flex gap-3">
+                <button (click)="editProduct(product)" class="text-sm font-medium text-primary">Editar</button>
+                <button (click)="toggleProductStatus(product)" 
+                        [class]="product.active ? 'text-red-600' : 'text-green-600'"
+                        class="text-sm font-medium">
+                  {{ product.active ? 'Desativar' : 'Ativar' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </app-card>
+    </ng-template>
+  </app-data-list>
+
+  <!-- Create/Edit Modal -->
+  <app-modal
+    [isOpen]="showCreateForm"
+    [title]="editingProduct ? 'Editar Produto' : 'Novo Produto'"
+    [confirmLabel]="saving ? 'Salvando...' : (editingProduct ? 'Atualizar' : 'Criar')"
+    cancelLabel="Cancelar"
+    [loading]="saving"
+    (confirmed)="saveProduct()"
+    (cancelled)="cancelForm()"
+    (closed)="cancelForm()">
+    
+    <form (ngSubmit)="saveProduct()" #productForm="ngForm" class="space-y-4">
+      <!-- Image Upload -->
+      <div class="flex justify-center mb-6">
+        <div class="relative group cursor-pointer" (click)="imageInput.click()">
+          <div class="h-32 w-32 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-gray-50 hover:bg-gray-100 transition-colors">
+            <img *ngIf="productImagePreview || productFormData.image_url" 
+                 [src]="productImagePreview || getImageUrl(productFormData.image_url)" 
+                 class="h-full w-full object-cover">
+            <div *ngIf="!productImagePreview && !productFormData.image_url" class="text-center p-2">
+              <svg class="mx-auto h-8 w-8 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <p class="text-xs text-gray-500 mt-1">Adicionar foto</p>
+            </div>
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+              <div class="hidden group-hover:block bg-white/90 rounded-full p-2 shadow-sm">
+                <svg class="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </div>
+            </div>
+          </div>
+          <input type="file" #imageInput (change)="onImageSelected($event, imageInput)" accept="image/*" class="hidden">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+          <input [(ngModel)]="productFormData.name" name="name" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+        
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Código (SKU) *</label>
+          <input [(ngModel)]="productFormData.sku" name="sku" required 
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Preço (R$) *</label>
+          <input type="number" [(ngModel)]="productFormData.price" name="price" required min="0" step="0.01"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Unidade</label>
+          <input type="text" [(ngModel)]="productFormData.unit_type" name="unit_type" placeholder="Ex: Kg, Unidade"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="col-span-2 md:col-span-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Intervalo *</label>
+          <select [(ngModel)]="productFormData.interval" name="interval" required (change)="onIntervalChange()"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+            <option value="daily">Diário</option>
+            <option value="weekly">Semanal</option>
+            <option value="biweekly">Quinzenal</option>
+            <option value="monthly">Mensal</option>
+            <option value="quarterly">Trimestral</option>
+            <option value="custom">Personalizado</option>
+          </select>
+        </div>
+
+        <div class="col-span-2 md:col-span-1" *ngIf="productFormData.interval === 'custom'">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Dias *</label>
+          <input type="number" [(ngModel)]="productFormData.custom_interval_days" name="custom_interval_days" required min="1"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+        </div>
+
+        <div class="col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+          <textarea [(ngModel)]="productFormData.description" name="description" rows="3"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary"></textarea>
+        </div>
+      </div>
+
+      <div *ngIf="error" class="p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        {{ error }}
+      </div>
+    </form>
+  </app-modal>
+</div>
+

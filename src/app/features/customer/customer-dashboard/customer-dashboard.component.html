@@ -1,0 +1,203 @@
+<div class="min-h-screen bg-background">
+  <app-marketplace-navbar></app-marketplace-navbar>
+  
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <app-page-header
+      title="Meu Portal"
+      [description]="'Bem-vindo, ' + getUserName() + '!'"
+      [showActions]="false">
+    </app-page-header>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <app-card variant="interactive" [elevation]="1" padding="lg" customClass="border-l-4 border-primary-light" (click)="router.navigate(['/customer/subscriptions'])">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-body-sm font-medium text-gray-600 mb-1">Assinaturas Ativas</p>
+            <p class="text-h1 font-bold text-primary">{{ activeSubscriptionsCount }}</p>
+          </div>
+          <div class="w-12 h-12 bg-primary-light/10 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+        <div class="text-body-sm text-primary-light mt-2 font-medium">
+          Ver todas →
+        </div>
+      </app-card>
+
+      <app-card variant="interactive" [elevation]="1" padding="lg" customClass="border-l-4 border-success" (click)="router.navigate(['/customer/orders'])">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-body-sm font-medium text-gray-600 mb-1">Pedidos Pendentes</p>
+            <p class="text-h1 font-bold text-primary">{{ pendingOrdersCount }}</p>
+          </div>
+          <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+        </div>
+        <div class="text-body-sm text-success mt-2 font-medium">
+          Ver pedidos →
+        </div>
+      </app-card>
+
+      <app-card variant="default" [elevation]="1" padding="lg" customClass="border-l-4 border-secondary">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <p class="text-body-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
+              <app-map-pin-icon size="sm" variant="filled" color="text-secondary"></app-map-pin-icon>
+              Próxima Entrega
+            </p>
+            <p class="text-h3 font-semibold text-primary">
+              {{ nextDeliveryDate ? formatDate(nextDeliveryDate) : 'Nenhuma' }}
+            </p>
+            <p *ngIf="nextDeliveryProduct" class="text-body-sm text-gray-500 mt-1 truncate">{{ nextDeliveryProduct }}</p>
+          </div>
+        </div>
+      </app-card>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- My Subscriptions Preview -->
+      <app-card [elevation]="1" padding="lg">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-h2 font-display text-primary">Minhas Assinaturas</h2>
+          <a routerLink="/customer/subscriptions" class="text-body-sm text-primary-light hover:text-primary-light-600 font-medium">
+            Ver todas →
+          </a>
+        </div>
+
+        <div *ngIf="loadingSubscriptions" class="text-center py-8">
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+        </div>
+
+        <div *ngIf="!loadingSubscriptions && activeSubscriptions.length === 0" class="text-center py-8">
+          <app-map-pin-icon size="xl" variant="outline" color="text-gray-300" class="mx-auto mb-4"></app-map-pin-icon>
+          <p class="text-body text-gray-500 mb-4">Nenhuma assinatura ativa</p>
+          <app-button 
+            variant="primary"
+            size="md"
+            label="Explorar Produtos"
+            (clicked)="router.navigate(['/catalog'])">
+          </app-button>
+        </div>
+
+        <div *ngIf="!loadingSubscriptions && activeSubscriptions.length > 0" class="space-y-4">
+          <app-card *ngFor="let sub of activeSubscriptions.slice(0, 3)" 
+                    variant="interactive"
+                    [elevation]="0"
+                    padding="md"
+                    customClass="border border-gray-200 hover:border-primary-light transition-all">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <h3 class="text-h4 text-primary mb-2">{{ sub.product_name || 'Produto' }}</h3>
+                <div class="flex items-center gap-4 text-body-sm text-gray-600 mb-2">
+                  <span class="flex items-center gap-2">
+                    <app-map-pin-icon size="sm" variant="filled" color="text-primary-light"></app-map-pin-icon>
+                    Próxima: {{ formatDate(sub.next_delivery) }}
+                  </span>
+                  <span>Qtd: {{ sub.quantity }}</span>
+                </div>
+                <app-badge variant="success" size="sm" label="Ativa"></app-badge>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </app-card>
+
+      <!-- Recent Orders Preview -->
+      <app-card [elevation]="1" padding="lg">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-h2 font-display text-primary">Pedidos Recentes</h2>
+          <a routerLink="/customer/orders" class="text-body-sm text-primary-light hover:text-primary-light-600 font-medium">
+            Ver todos →
+          </a>
+        </div>
+
+        <div *ngIf="loadingOrders" class="text-center py-8">
+          <app-skeleton-loader type="card"></app-skeleton-loader>
+        </div>
+
+        <div *ngIf="!loadingOrders && recentOrders.length === 0" class="text-center py-8">
+          <app-map-pin-icon size="xl" variant="outline" color="text-gray-300" class="mx-auto mb-4"></app-map-pin-icon>
+          <p class="text-body text-gray-500 mb-4">Nenhum pedido ainda</p>
+          <app-button 
+            variant="primary"
+            size="md"
+            label="Fazer Pedido"
+            (clicked)="router.navigate(['/catalog'])">
+          </app-button>
+        </div>
+
+        <div *ngIf="!loadingOrders && recentOrders.length > 0" class="space-y-4">
+          <app-card *ngFor="let order of recentOrders.slice(0, 3)" 
+                    variant="interactive"
+                    [elevation]="0"
+                    padding="md"
+                    customClass="border border-gray-200 hover:border-primary-light transition-all">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-h4 text-primary font-semibold">{{ formatDate(order.delivery_date) }}</span>
+                  <app-badge [variant]="getStatusBadgeVariant(order.status)" size="sm" [label]="getStatusLabel(order.status)"></app-badge>
+                </div>
+                <p class="text-body-sm text-gray-600 mb-1">{{ order.product_name || 'Pedido' }}</p>
+                <p class="text-h4 font-semibold text-primary-light">{{ formatCurrency(order.amount || 0) }}</p>
+              </div>
+            </div>
+          </app-card>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Quick Actions -->
+    <app-card [elevation]="1" padding="lg" customClass="mt-8">
+      <h2 class="text-h2 font-display text-primary mb-6">Ações Rápidas</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-primary-light/30 hover:border-primary-light transition-all cursor-pointer" (click)="router.navigate(['/catalog'])">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-primary-light/10 rounded-large flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-h4 text-primary font-semibold">Explorar Catálogo</p>
+              <p class="text-body-sm text-gray-500">Ver produtos disponíveis</p>
+            </div>
+          </div>
+        </app-card>
+
+        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-success/30 hover:border-success transition-all cursor-pointer" (click)="router.navigate(['/customer/subscriptions'])">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-success/10 rounded-large flex items-center justify-center">
+              <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-h4 text-primary font-semibold">Minhas Assinaturas</p>
+              <p class="text-body-sm text-gray-500">Gerenciar assinaturas</p>
+            </div>
+          </div>
+        </app-card>
+
+        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-secondary/30 hover:border-secondary transition-all cursor-pointer" (click)="router.navigate(['/customer/orders'])">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-secondary/10 rounded-large flex items-center justify-center">
+              <app-map-pin-icon size="md" variant="filled" color="text-secondary"></app-map-pin-icon>
+            </div>
+            <div>
+              <p class="text-h4 text-primary font-semibold">Meus Pedidos</p>
+              <p class="text-body-sm text-gray-500">Histórico de pedidos</p>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </app-card>
+  </div>
+</div>
+

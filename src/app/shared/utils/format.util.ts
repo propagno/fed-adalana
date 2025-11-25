@@ -1,9 +1,42 @@
 export class FormatUtil {
-  static formatCurrency(value: number, currency: string = 'BRL'): string {
+  /**
+   * Formata valor em CENTAVOS para moeda brasileira
+   * Usado para: produtos, carrinhos, pedidos (que usam priceCents)
+   * @param cents Valor em centavos (ex: 2200 = R$ 22,00)
+   * @param currency Código da moeda (padrão: 'BRL')
+   */
+  static formatCurrency(cents: number | null | undefined, currency: string = 'BRL'): string {
+    if (cents === null || cents === undefined || isNaN(cents)) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: currency || 'BRL'
+      }).format(0);
+    }
+    // Divide por 100 porque o valor vem em centavos
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: currency || 'BRL'
-    }).format(value / 100); // Assuming value is in cents
+    }).format(cents / 100);
+  }
+
+  /**
+   * Formata valor em REAIS (BigDecimal) para moeda brasileira
+   * Usado para: frete, valores já em reais do backend
+   * @param reais Valor em reais (ex: 22.50 = R$ 22,50)
+   * @param currency Código da moeda (padrão: 'BRL')
+   */
+  static formatCurrencyFromReais(reais: number | null | undefined, currency: string = 'BRL'): string {
+    if (reais === null || reais === undefined || isNaN(reais)) {
+      return new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: currency || 'BRL'
+      }).format(0);
+    }
+    // Não divide, o valor já está em reais
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: currency || 'BRL'
+    }).format(reais);
   }
 
   static formatDate(date: string | Date): string {

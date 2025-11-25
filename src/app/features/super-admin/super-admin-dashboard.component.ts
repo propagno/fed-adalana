@@ -49,8 +49,80 @@ import { AccountValidators } from '../../shared/validators/account.validators';
       </header>
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Métricas Globais -->
+        <!-- Ações Rápidas -->
         <section class="mb-8">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">Ações Rápidas</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Card de Solicitações de Empresas -->
+            <div class="card cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200" 
+                 (click)="viewCompanyRequests()">
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="material-icons text-white text-2xl">business_center</span>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-1">Solicitações de Cadastro</h3>
+                  <p class="text-sm text-gray-600 mb-3">
+                    Aprovar ou rejeitar solicitações de novas empresas da landing page
+                  </p>
+                  <div class="flex items-center text-blue-600">
+                    <span class="text-sm font-medium">Gerenciar solicitações</span>
+                    <span class="material-icons text-sm ml-1">arrow_forward</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card de Criar Nova Empresa (existente) -->
+            <div class="card cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200"
+                 (click)="toggleCreateForm()">
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                    <span class="material-icons text-white text-2xl">add_business</span>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-1">Nova Empresa</h3>
+                  <p class="text-sm text-gray-600 mb-3">
+                    Criar manualmente uma nova empresa no sistema
+                  </p>
+                  <div class="flex items-center text-green-600">
+                    <span class="text-sm font-medium">Criar empresa</span>
+                    <span class="material-icons text-sm ml-1">arrow_forward</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card de Analytics -->
+            <div class="card cursor-pointer hover:shadow-xl transition-all hover:scale-105 bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200"
+                 (click)="viewMetricsSection()">
+              <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                  <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <span class="material-icons text-white text-2xl">analytics</span>
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-1">Métricas do Sistema</h3>
+                  <p class="text-sm text-gray-600 mb-3">
+                    Visualizar estatísticas e métricas globais
+                  </p>
+                  <div class="flex items-center text-purple-600">
+                    <span class="text-sm font-medium">Ver métricas</span>
+                    <span class="material-icons text-sm ml-1">arrow_forward</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Métricas Globais -->
+        <section class="mb-8" id="metrics-section">
           <h2 class="text-xl font-semibold text-gray-900 mb-4">Métricas Globais</h2>
           <div *ngIf="loadingMetrics" class="text-center py-8 text-gray-500">
             Carregando métricas...
@@ -115,7 +187,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
           </div>
 
           <!-- Formulário de Criação -->
-          <app-card *ngIf="showCreateForm" [elevation]="2" padding="lg" class="mb-6">
+          <app-card *ngIf="showCreateForm" [elevation]="2" padding="lg" customClass="mb-6">
             <h3 class="text-h3 text-primary mb-6">Criar Nova Empresa</h3>
             <form (ngSubmit)="createAccount()" [formGroup]="accountForm" class="space-y-0">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -165,7 +237,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
 
                 <!-- Telefone -->
                 <div class="mb-4">
-                  <label class="block text-body-sm font-medium text-adalana mb-2.5">
+                  <label class="block text-body-sm font-medium text-primary mb-2.5">
                     Telefone
                   </label>
                   <input
@@ -174,7 +246,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
                     mask="(00) 00000-0000"
                     [maxlength]="15"
                     placeholder="(00) 00000-0000"
-                    class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-adalana-light focus:ring-adalana-light">
+                    class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light">
                   <p *ngIf="getFieldError('phone')" class="mt-1.5 text-body-sm text-error">
                     {{ getFieldError('phone') }}
                   </p>
@@ -182,13 +254,13 @@ import { AccountValidators } from '../../shared/validators/account.validators';
 
                 <!-- Tipo de Documento -->
                 <div class="mb-4">
-                  <label class="block text-body-sm font-medium text-adalana mb-2.5">
+                  <label class="block text-body-sm font-medium text-primary mb-2.5">
                     Tipo de Documento
-                    <span class="text-adalana-accent ml-1">*</span>
+                    <span class="text-secondary ml-1">*</span>
                   </label>
                   <select 
                     formControlName="documentType"
-                    class="w-full px-4 py-2.5 border border-gray-300 rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-adalana-light focus:ring-adalana-light"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light"
                     (change)="onDocumentTypeChange()">
                     <option value="CPF">CPF</option>
                     <option value="CNPJ">CNPJ</option>
@@ -201,16 +273,16 @@ import { AccountValidators } from '../../shared/validators/account.validators';
 
                 <!-- CPF/CNPJ -->
                 <div class="mb-4">
-                  <label class="block text-body-sm font-medium text-adalana mb-2.5">
+                  <label class="block text-body-sm font-medium text-primary mb-2.5">
                     CPF/CNPJ
-                    <span class="text-adalana-accent ml-1">*</span>
+                    <span class="text-secondary ml-1">*</span>
                   </label>
                   <input
                     formControlName="documentNumber"
                     [mask]="getDocumentMask()"
                     [maxlength]="18"
                     [placeholder]="getDocumentPlaceholder()"
-                    class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-adalana-light focus:ring-adalana-light"
+                    class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light"
                     [class.border-error]="accountForm.get('documentNumber')?.hasError('required') && accountForm.get('documentNumber')?.touched">
                   <p *ngIf="getFieldError('documentNumber')" class="mt-1.5 text-body-sm text-error">
                     {{ getFieldError('documentNumber') }}
@@ -237,6 +309,38 @@ import { AccountValidators } from '../../shared/validators/account.validators';
                   placeholder="Razão social completa"
                   [errorMessage]="getFieldError('legalName')">
                 </app-input>
+
+                <!-- Categoria -->
+                <div class="mb-4">
+                  <label class="block text-body-sm font-medium text-primary mb-2.5">
+                    Categoria
+                  </label>
+                  <select 
+                    formControlName="category"
+                    class="w-full px-4 py-2.5 border border-gray-300 rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light">
+                    <option value="">Selecione uma categoria (opcional)</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Bebidas">Bebidas</option>
+                    <option value="Limpeza">Limpeza</option>
+                    <option value="Higiene">Higiene</option>
+                    <option value="Cuidados Pessoais">Cuidados Pessoais</option>
+                    <option value="Pet Shop">Pet Shop</option>
+                    <option value="Hortifruti">Hortifruti</option>
+                    <option value="Padaria">Padaria</option>
+                    <option value="Açougue">Açougue</option>
+                    <option value="Peixaria">Peixaria</option>
+                    <option value="Laticínios">Laticínios</option>
+                    <option value="Congelados">Congelados</option>
+                    <option value="Produtos Naturais">Produtos Naturais</option>
+                    <option value="Orgânicos">Orgânicos</option>
+                    <option value="Suplementos">Suplementos</option>
+                    <option value="Farmácia">Farmácia</option>
+                    <option value="Outros">Outros</option>
+                  </select>
+                  <p *ngIf="getFieldError('category')" class="mt-1.5 text-body-sm text-error">
+                    {{ getFieldError('category') }}
+                  </p>
+                </div>
               </div>
 
               <!-- Seção de Endereço -->
@@ -245,7 +349,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <!-- CEP -->
                   <div class="mb-4">
-                    <label class="block text-body-sm font-medium text-adalana mb-2.5">
+                    <label class="block text-body-sm font-medium text-primary mb-2.5">
                       CEP
                     </label>
                     <input
@@ -261,7 +365,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
                       [maxlength]="9"
                       placeholder="00000-000"
                       [class.border-error]="accountForm.get('cep')?.invalid && accountForm.get('cep')?.touched"
-                      class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-adalana-light focus:ring-adalana-light">
+                      class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light">
                     <p *ngIf="loadingCep" class="mt-1.5 text-body-sm text-info">Buscando endereço...</p>
                     <p *ngIf="getFieldError('cep')" class="mt-1.5 text-body-sm text-error">
                       {{ getFieldError('cep') }}
@@ -315,14 +419,14 @@ import { AccountValidators } from '../../shared/validators/account.validators';
 
                   <!-- Estado (UF) -->
                   <div class="mb-4">
-                    <label class="block text-body-sm font-medium text-adalana mb-2.5">
+                    <label class="block text-body-sm font-medium text-primary mb-2.5">
                       Estado (UF)
                     </label>
                     <input
                       formControlName="state"
                       [maxlength]="2"
                       placeholder="SP"
-                      class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-adalana-light focus:ring-adalana-light uppercase"
+                      class="w-full px-4 py-2.5 border rounded-medium text-body transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:border-primary-light focus:ring-primary-light uppercase"
                       style="text-transform: uppercase;">
                     <p *ngIf="getFieldError('state')" class="mt-1.5 text-body-sm text-error">
                       {{ getFieldError('state') }}
@@ -342,7 +446,7 @@ import { AccountValidators } from '../../shared/validators/account.validators';
 
               <!-- Logo da Empresa -->
               <div class="mt-6 pt-6 border-t border-gray-200">
-                <label class="block text-body-sm font-medium text-adalana mb-2.5">Logo da Empresa</label>
+                <label class="block text-body-sm font-medium text-primary mb-2.5">Logo da Empresa</label>
                   <div class="space-y-3">
                     <input type="file" 
                            #logoInput
@@ -552,6 +656,7 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
       documentNumber: ['', [Validators.required]],
       tradeName: ['', [Validators.maxLength(255)]],
       legalName: ['', []],
+      category: [''],
       // Endereço completo - todos opcionais
       cep: ['', [Validators.maxLength(9), this.cepValidator]],
       street: ['', [Validators.maxLength(255)]],
@@ -562,6 +667,11 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
       state: ['', [Validators.maxLength(2)]],
       country: ['Brasil', []]
     });
+
+    // Inicializar validações baseadas no tipo de documento padrão (CNPJ)
+    this._documentType = 'CNPJ';
+    this.updateLegalNameValidation();
+    this.updateDocumentNumberValidation();
 
     // Atualizar validação de legalName e documentNumber quando documentType mudar
     // Usar pipe para evitar ExpressionChangedAfterItHasBeenCheckedError
@@ -611,6 +721,11 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
     } else {
       documentNumberControl.setValidators([Validators.required]);
     }
+    // Forçar revalidação do valor atual
+    const currentValue = documentNumberControl.value;
+    if (currentValue) {
+      documentNumberControl.setValue(currentValue, { emitEvent: false });
+    }
     documentNumberControl.updateValueAndValidity({ emitEvent: false });
   }
 
@@ -634,6 +749,7 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
       documentNumber: '',
       tradeName: '',
       legalName: '',
+      category: '',
       cep: '',
       street: '',
       number: '',
@@ -670,7 +786,9 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
   }
 
   isCreateButtonDisabled(): boolean {
-    return this.creatingAccount || this.isFormInvalid;
+    if (this.creatingAccount) return true;
+    if (!this.accountForm) return true;
+    return this.accountForm.invalid;
   }
 
   // Custom CEP validator
@@ -716,6 +834,12 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
     }
     if (control.errors['cepInvalid']) {
       return control.errors['cepInvalid'].message || 'CEP inválido';
+    }
+    if (control.errors['cpf']) {
+      return control.errors['cpf'].message || 'CPF inválido';
+    }
+    if (control.errors['cnpj']) {
+      return control.errors['cnpj'].message || 'CNPJ inválido';
     }
     return '';
   }
@@ -940,7 +1064,7 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
       Object.keys(this.accountForm.controls).forEach(key => {
         this.accountForm.get(key)?.markAsTouched();
       });
-      this.error = 'Por favor, corrija os erros no formulário';
+      this.error = 'Por favor, preencha todos os campos obrigatórios corretamente.';
       return;
     }
 
@@ -1001,6 +1125,7 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
       tradeName: formValue.tradeName || '',
       legalName: formValue.legalName || '',
       imageUrl: imageUrl || '',
+      category: formValue.category || '',
       addressDTO: Object.keys(addressDTO).length > 0 ? addressDTO : undefined // Endereço estruturado
     };
 
@@ -1135,6 +1260,18 @@ export class SuperAdminDashboardComponent implements OnInit, AfterViewInit {
     }
     const apiBaseUrl = environment.apiUrl || 'http://localhost:8080';
     return `${apiBaseUrl}${imageUrl}`;
+  }
+
+  viewCompanyRequests(): void {
+    this.router.navigate(['/super-admin/company-requests']);
+  }
+
+  viewMetricsSection(): void {
+    // Scroll suave para a seção de métricas
+    const metricsSection = document.getElementById('metrics-section');
+    if (metricsSection) {
+      metricsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   logout(): void {

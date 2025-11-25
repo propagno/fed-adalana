@@ -1,1 +1,7 @@
-/* Component-specific styles are handled by Tailwind CSS */
+/* Login Component Styles */
+/* No specific overrides needed with Tailwind utility classes */
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}

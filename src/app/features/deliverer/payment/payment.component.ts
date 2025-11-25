@@ -2,7 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DeliveryService, PaymentRecordRequest, DeliveryRouteResponse } from '../../../core/services/delivery.service';
+import { ApiService } from '../../../core/services/api.service';
+
+interface PaymentRecordRequest {
+  payment_method: 'cash' | 'pix' | 'pending';
+  amount_cents: number;
+  payment_notes?: string;
+  external_reference?: string;
+}
+
+interface DeliveryRouteResponse {
+  order_id: string;
+  total_amount: number;
+  currency?: string;
+  customer_name?: string;
+}
 
 @Component({
   selector: 'app-payment',
@@ -25,7 +39,7 @@ export class PaymentComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private deliveryService: DeliveryService
+    private apiService: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -37,15 +51,15 @@ export class PaymentComponent implements OnInit {
 
   loadDelivery(orderId: string): void {
     this.loading = true;
-    this.deliveryService.getMyRoute().subscribe({
+    this.apiService.get<DeliveryRouteResponse[]>('/deliverer/routes').subscribe({
       next: (deliveries) => {
-        this.delivery = deliveries.find(d => d.order_id === orderId) || null;
+        this.delivery = deliveries.find((d: DeliveryRouteResponse) => d.order_id === orderId) || null;
         if (this.delivery) {
           this.amountCents = Math.round(this.delivery.total_amount * 100);
         }
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error = 'Erro ao carregar informações da entrega';
         this.loading = false;
         console.error('Error loading delivery', err);
@@ -66,6 +80,14 @@ export class PaymentComponent implements OnInit {
     return this.delivery.total_amount - this.getAmountInReais();
   }
 
+  getCurrency(): string {
+    return this.delivery?.currency || 'BRL';
+  }
+
+  getCustomerName(): string {
+    return this.delivery?.customer_name || 'Cliente';
+  }
+
   submitPayment(): void {
     if (!this.delivery) return;
 
@@ -84,12 +106,12 @@ export class PaymentComponent implements OnInit {
       external_reference: this.externalReference || undefined
     };
 
-    this.deliveryService.recordPayment(this.delivery.order_id, request).subscribe({
+    this.apiService.post(`/orders/${this.delivery.order_id}/payment`, request).subscribe({
       next: () => {
         this.submitting = false;
         this.router.navigate(['/deliverer']);
       },
-      error: (err) => {
+      error: (err: any) => {
         this.error = 'Erro ao registrar pagamento. Tente novamente.';
         this.submitting = false;
         console.error('Error recording payment', err);

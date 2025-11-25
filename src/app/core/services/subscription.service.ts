@@ -11,6 +11,7 @@ export interface Subscription {
   customer_email?: string;
   product_name?: string;
   product_sku?: string;
+  account_name?: string;
   start_date: string;
   next_delivery: string;
   status: string;
@@ -29,6 +30,7 @@ export interface Subscription {
   last_delivery_date?: string;
   total_deliveries_count?: number;
   subscription_value?: number;
+  subscription_club_id?: string; // ID do clube VIP, se esta assinatura faz parte de um clube
 }
 
 export interface UpdateSubscriptionRequest {
