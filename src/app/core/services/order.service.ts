@@ -51,6 +51,11 @@ export interface OrderResponse {
   cancellation_requested_at?: string;
   cancellation_request_responded_at?: string;
   assigned_deliverer_id?: string;
+  // Discount information
+  club_discount_cents?: number;
+  promotion_discount_cents?: number;
+  promotion_code?: string;
+  subtotal_cents?: number;
 }
 
 export interface OrderFilters {

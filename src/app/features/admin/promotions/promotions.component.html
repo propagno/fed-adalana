@@ -48,16 +48,20 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <app-badge 
-                [variant]="promotion.active ? 'success' : 'error'"
-                [label]="promotion.active ? 'Ativa' : 'Inativa'">
+                [variant]="getPromotionStatus(promotion).variant"
+                [label]="getPromotionStatus(promotion).label">
               </app-badge>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-              <button (click)="togglePromotionStatus(promotion)" 
+              <button *ngIf="canTogglePromotion(promotion)" 
+                      (click)="togglePromotionStatus(promotion)" 
                       [class]="promotion.active ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'"
                       class="transition-colors">
                 {{ promotion.active ? 'Desativar' : 'Ativar' }}
               </button>
+              <span *ngIf="!canTogglePromotion(promotion)" class="text-gray-400 text-xs">
+                Vencida
+              </span>
             </td>
           </tr>
         </tbody>
@@ -76,8 +80,8 @@
             <p class="text-sm text-gray-500 mt-1">{{ formatDate(promotion.start_date) }} - {{ formatDate(promotion.end_date) }}</p>
           </div>
           <app-badge 
-              [variant]="promotion.active ? 'success' : 'error'"
-              [label]="promotion.active ? 'Ativa' : 'Inativa'">
+              [variant]="getPromotionStatus(promotion).variant"
+              [label]="getPromotionStatus(promotion).label">
           </app-badge>
         </div>
         
@@ -88,11 +92,15 @@
               {{ promotion.discount_type === 'PERCENTAGE' ? promotion.discount_value + '%' : 'R$ ' + promotion.discount_value.toFixed(2) }}
             </p>
           </div>
-          <button (click)="togglePromotionStatus(promotion)" 
+          <button *ngIf="canTogglePromotion(promotion)" 
+                  (click)="togglePromotionStatus(promotion)" 
                   [class]="promotion.active ? 'text-red-600' : 'text-green-600'"
                   class="text-sm font-medium">
             {{ promotion.active ? 'Desativar' : 'Ativar' }}
           </button>
+          <span *ngIf="!canTogglePromotion(promotion)" class="text-gray-400 text-xs">
+            Vencida
+          </span>
         </div>
       </app-card>
     </ng-template>

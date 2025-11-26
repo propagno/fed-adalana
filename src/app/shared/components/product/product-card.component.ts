@@ -41,90 +41,75 @@ export interface ProductCardData {
       [attr.aria-label]="'Produto ' + product.name"
       tabindex="0"
       role="button"
-      class="group cursor-pointer overflow-hidden transition-all duration-200 active:shadow-elevation-0 active:scale-[0.98] focus:ring-2 focus:ring-primary focus:ring-offset-2 lg:hover:shadow-elevation-3 lg:hover:scale-[1.01] marketplace-card">
+      class="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-brand-md marketplace-card h-full flex flex-col bg-white">
       
       <!-- Product Image -->
-      <div class="relative aspect-square bg-gray-100 overflow-hidden">
+      <div class="relative aspect-square bg-gray-50 overflow-hidden">
         <img *ngIf="getImageUrl(product.image_url) && !imageError" 
              [src]="getImageUrl(product.image_url)" 
              [alt]="'Imagem do produto ' + product.name"
              (error)="onImageError($event)"
-             class="w-full h-full object-cover"
+             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
              loading="lazy">
+             
         <div *ngIf="!getImageUrl(product.image_url) || imageError" class="w-full h-full flex items-center justify-center bg-gray-50">
-          <div class="text-gray-400 text-4xl font-display opacity-50">{{ product.name.charAt(0).toUpperCase() }}</div>
+          <div class="text-gray-300 text-4xl font-display opacity-50">{{ product.name.charAt(0).toUpperCase() }}</div>
         </div>
         
         <!-- Badges -->
         <div class="absolute top-2 left-2 flex flex-col gap-1.5 z-10">
-          <app-badge *ngIf="product.isNew" variant="success" size="sm" label="Novo"></app-badge>
-          <app-badge *ngIf="product.isPromotion && product.discountPercentage" variant="error" size="sm" [label]="'-' + product.discountPercentage + '%'"></app-badge>
-          <app-badge *ngIf="product.bestSeller" variant="warning" size="sm" label="Mais Vendido"></app-badge>
+          <app-badge *ngIf="product.isNew" variant="success" size="sm" label="Novo" class="shadow-sm"></app-badge>
+          <app-badge *ngIf="product.isPromotion && product.discountPercentage" variant="error" size="sm" [label]="'-' + product.discountPercentage + '%'" class="shadow-sm"></app-badge>
         </div>
         
-        <div class="absolute top-2 right-2 flex flex-col gap-1.5 z-10">
-          <app-badge *ngIf="product.freeShipping" variant="info" size="sm" label="Frete Grátis"></app-badge>
-          <app-badge *ngIf="product.category" variant="secondary" size="sm" [label]="product.category"></app-badge>
+        <!-- Quick Add Overlay (Desktop) -->
+        <div class="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden lg:flex justify-center">
+          <button 
+            (click)="onAddToCart($event)"
+            class="w-full bg-white text-primary font-bold py-2 px-4 rounded-full shadow-lg transform hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+            Adicionar
+          </button>
         </div>
       </div>
       
       <!-- Product Info -->
-      <div class="p-4 md:p-6">
-        <div class="mb-3">
-          <h3 class="text-h4 font-display font-semibold text-gray-900 mb-1 line-clamp-2">
-            {{ product.name }}
-          </h3>
-          <p *ngIf="product.description" class="text-body-sm text-gray-600 line-clamp-2 mt-1">
+      <div class="p-4 flex-1 flex flex-col">
+        <div class="mb-2">
+          <div class="flex justify-between items-start gap-2">
+            <h3 class="text-base font-medium text-gray-900 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+              {{ product.name }}
+            </h3>
+            <!-- Rating Mini -->
+            <div *ngIf="product.rating" class="flex items-center gap-0.5 text-xs font-medium text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded flex-shrink-0">
+              <svg class="w-3 h-3 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {{ product.rating.toFixed(1) }}
+            </div>
+          </div>
+          
+          <p *ngIf="product.description" class="text-xs text-gray-500 line-clamp-2 mt-1">
             {{ product.description }}
           </p>
         </div>
         
-        <!-- Rating -->
-        <div *ngIf="product.rating" class="flex items-center gap-1 mb-3">
-          <div class="flex items-center">
-            <svg *ngFor="let i of [1,2,3,4,5]" 
-                 class="w-4 h-4"
-                 [class.text-yellow-400]="i <= getRoundedRating()"
-                 [class.text-gray-300]="i > getRoundedRating()"
-                 fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
+        <div class="mt-auto pt-3 flex items-end justify-between border-t border-gray-50">
+          <div class="flex flex-col">
+            <span *ngIf="product.isPromotion && originalPrice" class="text-xs text-gray-400 line-through">
+              {{ formatCurrency(originalPrice) }}
+            </span>
+            <span class="text-lg font-bold text-primary leading-none">
+              {{ formatCurrency(product.price_cents) }}
+            </span>
           </div>
-          <span class="text-body-sm text-gray-600 ml-1">
-            {{ getFormattedRating() }}
-            <span *ngIf="product.reviewCount" class="text-gray-400">({{ product.reviewCount }})</span>
-          </span>
-        </div>
-        
-        <!-- Price -->
-        <div class="flex items-baseline gap-2 mb-4">
-          <span class="text-2xl md:text-h2 font-bold text-primary">{{ formatCurrency(product.price_cents) }}</span>
-          <span *ngIf="product.isPromotion && originalPrice" class="text-body-sm text-gray-500 line-through">
-            {{ formatCurrency(originalPrice) }}
-          </span>
-        </div>
-        
-        <!-- SKU -->
-        <p *ngIf="product.sku" class="text-caption text-gray-500 mb-3">SKU: {{ product.sku }}</p>
-        
-        <!-- Action Buttons - Always visible in mobile -->
-        <div class="flex flex-col sm:flex-row gap-2">
-          <app-button 
-            variant="primary"
-            size="sm"
-            label="Adicionar"
-            [fullWidth]="true"
-            (clicked)="onAddToCart($event)"
-            ariaLabel="Adicionar ao carrinho">
-          </app-button>
-          <app-button 
-            variant="outline"
-            size="sm"
-            label="Detalhes"
-            [fullWidth]="true"
-            (clicked)="onViewDetails($event)"
-            ariaLabel="Ver detalhes do produto">
-          </app-button>
+          
+          <!-- Mobile Add Button (Visible only on mobile) -->
+          <button 
+            (click)="onAddToCart($event)"
+            class="lg:hidden w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-md active:scale-95 transition-transform">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          </button>
         </div>
       </div>
     </app-card>

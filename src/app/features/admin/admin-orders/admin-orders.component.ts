@@ -405,9 +405,24 @@ import { of, Subject, Subscription } from 'rxjs';
                       {{ formatCurrencyFromCents(item.quantity * item.priceCents) }}
                     </div>
                   </li>
-                  <li class="px-6 py-4 bg-gray-50 flex justify-between items-center border-t border-gray-200">
-                    <span class="text-base font-medium text-gray-900">Total do Pedido</span>
-                    <span class="text-lg font-bold text-primary">{{ formatCurrency(selectedOrder.amount) }}</span>
+                  <!-- Price Breakdown -->
+                  <li class="px-6 py-4 bg-gray-50 border-t border-gray-200 space-y-2">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Subtotal</span>
+                      <span class="text-sm font-medium text-gray-900">{{ formatCurrencyFromCents(selectedOrder.subtotal_cents || (selectedOrder.amount * 100)) }}</span>
+                    </div>
+                    <div *ngIf="selectedOrder.club_discount_cents && selectedOrder.club_discount_cents > 0" class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Desconto Clube VIP</span>
+                      <span class="text-sm font-medium text-success">-{{ formatCurrencyFromCents(selectedOrder.club_discount_cents) }}</span>
+                    </div>
+                    <div *ngIf="selectedOrder.promotion_discount_cents && selectedOrder.promotion_discount_cents > 0" class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Desconto Cupom {{ selectedOrder.promotion_code }}</span>
+                      <span class="text-sm font-medium text-success">-{{ formatCurrencyFromCents(selectedOrder.promotion_discount_cents) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200">
+                      <span class="text-base font-medium text-gray-900">Total do Pedido</span>
+                      <span class="text-lg font-bold text-primary">{{ formatCurrency(selectedOrder.amount) }}</span>
+                    </div>
                   </li>
                 </ul>
               </div>

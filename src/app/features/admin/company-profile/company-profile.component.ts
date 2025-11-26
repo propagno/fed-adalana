@@ -8,13 +8,14 @@ import { ToastService } from '../../../shared/services/toast.service';
 import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
 import { CardComponent } from '../../../shared/components/design-system/card/card.component';
 import { InputComponent } from '../../../shared/components/design-system/input/input.component';
+import { SelectComponent } from '../../../shared/components/design-system/select/select.component';
 import { FileUploadService } from '../../../core/services/file-upload.service';
 import { AppearanceService, UpdateAppearanceRequest } from '../../../core/services/appearance.service';
 
 @Component({
   selector: 'app-company-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, CardComponent, InputComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ButtonComponent, CardComponent, InputComponent, SelectComponent],
   template: `
     <div class="container mx-auto px-4 py-6">
       <div class="mb-6">
@@ -389,6 +390,62 @@ import { AppearanceService, UpdateAppearanceRequest } from '../../../core/servic
           </form>
         </app-card>
       </div>
+
+      <!-- Tab: Pagamentos -->
+      <div *ngIf="activeTab === 'payments' && !loading && account">
+        <app-card [elevation]="1" padding="lg">
+          <h2 class="text-h2 mb-6">Configurações de Pagamento</h2>
+          
+          <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-body-sm text-blue-800">
+              <strong>Importante:</strong> Configure sua chave PIX para receber pagamentos de assinaturas do clube VIP.
+              A chave PIX será usada para gerar QR Codes de pagamento.
+            </p>
+          </div>
+
+          <form [formGroup]="pixForm" (ngSubmit)="savePixKey()" class="space-y-6">
+            <app-select formControlName="pixKeyType"
+                        label="Tipo de Chave PIX"
+                        placeholder="Selecione o tipo"
+                        [required]="true"
+                        [errorMessage]="pixForm.get('pixKeyType')?.invalid && pixForm.get('pixKeyType')?.touched ? 'Tipo de chave PIX é obrigatório' : undefined">
+              <option value="CPF">CPF</option>
+              <option value="CNPJ">CNPJ</option>
+              <option value="EMAIL">E-mail</option>
+              <option value="PHONE">Telefone</option>
+              <option value="RANDOM">Chave Aleatória (UUID)</option>
+            </app-select>
+
+            <app-input formControlName="pixKey"
+                       label="Chave PIX *"
+                       [placeholder]="getPixKeyPlaceholder()"
+                       [required]="true">
+            </app-input>
+
+            <div *ngIf="currentPixKey" class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <p class="text-body-sm text-gray-600 mb-1">Chave PIX atual:</p>
+              <p class="text-body font-semibold text-primary">{{ currentPixKey }}</p>
+              <p *ngIf="account?.settings?.pix_key_type" class="text-caption text-gray-500 mt-1">
+                Tipo: {{ account.settings?.pix_key_type }}
+              </p>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t">
+              <app-button variant="outline"
+                          label="Cancelar"
+                          (clicked)="resetPixForm()"
+                          [disabled]="savingPix">
+              </app-button>
+              <app-button variant="primary"
+                          label="Salvar Chave PIX"
+                          type="submit"
+                          [disabled]="pixForm.invalid || savingPix"
+                          [loading]="savingPix">
+              </app-button>
+            </div>
+          </form>
+        </app-card>
+      </div>
     </div>
   `,
   styles: []
@@ -401,7 +458,8 @@ export class CompanyProfileComponent implements OnInit {
   // Tabs
   tabs = [
     { id: 'info', label: 'Informações' },
-    { id: 'appearance', label: 'Aparência' }
+    { id: 'appearance', label: 'Aparência' },
+    { id: 'payments', label: 'Pagamentos' }
   ];
   activeTab = 'info';
   
@@ -418,6 +476,11 @@ export class CompanyProfileComponent implements OnInit {
   infoForm: FormGroup;
   editingInfo = false;
   savingInfo = false;
+  
+  // PIX settings
+  pixForm: FormGroup;
+  currentPixKey: string | null = null;
+  savingPix = false;
 
   constructor(
     private accountService: AccountService,
@@ -449,10 +512,65 @@ export class CompanyProfileComponent implements OnInit {
       state: ['', [Validators.maxLength(2), Validators.pattern(/^[A-Z]{2}$/)]],
       country: ['Brasil']
     });
+    
+    this.pixForm = this.fb.group({
+      pixKey: ['', [Validators.required]],
+      pixKeyType: ['', [Validators.required]]
+    });
   }
 
   ngOnInit(): void {
     this.loadAccount();
+  }
+  
+  loadPixKey(): void {
+    if (this.account?.settings) {
+      const settings = this.account.settings as any;
+      this.currentPixKey = settings.pix_key || null;
+      if (this.currentPixKey) {
+        this.pixForm.patchValue({
+          pixKey: this.currentPixKey,
+          pixKeyType: settings.pix_key_type || 'EMAIL'
+        });
+      }
+    }
+  }
+  
+  getPixKeyPlaceholder(): string {
+    const type = this.pixForm?.get('pixKeyType')?.value;
+    const placeholders: { [key: string]: string } = {
+      'CPF': '000.000.000-00',
+      'CNPJ': '00.000.000/0000-00',
+      'EMAIL': 'empresa@example.com',
+      'PHONE': '(00) 00000-0000',
+      'RANDOM': 'Chave aleatória gerada pelo banco'
+    };
+    return placeholders[type] || 'Digite a chave PIX';
+  }
+  
+  savePixKey(): void {
+    if (this.pixForm.invalid || !this.account) return;
+    
+    this.savingPix = true;
+    const { pixKey, pixKeyType } = this.pixForm.value;
+    
+    this.accountService.updatePixKey(this.account.id, pixKey, pixKeyType).subscribe({
+      next: () => {
+        this.toastService.success('Chave PIX atualizada com sucesso!');
+        this.currentPixKey = pixKey;
+        this.loadAccount(); // Recarregar dados da conta
+        this.savingPix = false;
+      },
+      error: (err) => {
+        this.toastService.error(err.error?.message || 'Erro ao atualizar chave PIX');
+        this.savingPix = false;
+      }
+    });
+  }
+  
+  resetPixForm(): void {
+    this.pixForm.reset();
+    this.loadPixKey();
   }
 
   loadAccount(): void {
@@ -463,6 +581,7 @@ export class CompanyProfileComponent implements OnInit {
         this.account = account;
         this.populateInfoForm(account);
         this.loadAppearance();
+        this.loadPixKey();
         this.loading = false;
       },
       error: (err) => {

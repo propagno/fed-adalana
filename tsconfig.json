@@ -9,6 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
+    "types": ["node"],
     "esModuleInterop": true,
     "sourceMap": true,
     "declaration": false,
@@ -17,6 +18,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
+    "typeRoots": ["./node_modules/@types", "./src/typings"],
     "lib": [
       "ES2022",
       "dom"

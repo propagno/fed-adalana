@@ -132,27 +132,39 @@ import { ProductService, Product } from '../../../core/services/product.service'
           </div>
           
           <div class="grid grid-cols-2 gap-4">
-            <app-input formControlName="monthlyFee"
-                       type="number"
-                       label="Taxa Mensal (R$)"
-                       [required]="true"
-                       [min]="0"
-                       [step]="0.01">
-            </app-input>
+            <div>
+              <app-input formControlName="monthlyFee"
+                         type="number"
+                         label="Taxa Mensal (R$)"
+                         [required]="true"
+                         [min]="0"
+                         [step]="0.01">
+              </app-input>
+              <p class="text-xs text-gray-500 mt-1">
+                Valor que o cliente paga mensalmente para ter acesso ao clube
+              </p>
+            </div>
             
-            <app-input formControlName="discountPercentage"
-                       type="number"
-                       label="Desconto (%)"
-                       [required]="true"
-                       [min]="0"
-                       [max]="100">
-            </app-input>
+            <div>
+              <app-input formControlName="discountPercentage"
+                         type="number"
+                         label="Desconto (%)"
+                         [required]="true"
+                         [min]="0"
+                         [max]="100">
+              </app-input>
+              <p class="text-xs text-gray-500 mt-1">
+                Desconto aplicado automaticamente nos produtos do clube
+              </p>
+            </div>
           </div>
           
           <div>
             <label class="block text-body font-medium mb-2">Produtos do Clube</label>
             <p class="text-body-sm text-gray-600 mb-3">
-              Selecione os produtos que serão incluídos automaticamente nas assinaturas deste clube
+              Selecione os produtos que serão incluídos automaticamente nas assinaturas deste clube.
+              <strong class="text-primary">Os preços exibidos são os preços individuais dos produtos.</strong>
+              O desconto configurado acima será aplicado automaticamente no checkout.
             </p>
             <div *ngIf="loadingProducts" class="text-body-sm text-gray-500 py-2">
               Carregando produtos...
@@ -275,7 +287,11 @@ export class SubscriptionClubsComponent implements OnInit {
     this.loadingProducts = true;
     this.productService.getProductsByAccount(this.accountId).subscribe({
       next: (products) => {
-        this.availableProducts = products.filter(p => p.active);
+        // Filtrar apenas produtos ativos com preço válido
+        this.availableProducts = products.filter(p => {
+          const hasValidPrice = (p.price && p.price > 0) || (p.price_cents && p.price_cents > 0);
+          return p.active && hasValidPrice;
+        });
         this.loadingProducts = false;
       },
       error: (err) => {

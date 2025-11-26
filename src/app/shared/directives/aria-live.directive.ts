@@ -7,7 +7,7 @@ import { Directive, Input, ElementRef, OnInit, OnDestroy } from '@angular/core';
 export class AriaLiveDirective implements OnInit, OnDestroy {
   @Input() appAriaLive: 'polite' | 'assertive' | 'off' = 'polite';
   @Input() ariaAtomic: boolean = false;
-  @Input() ariaRelevant: 'additions' | 'removals' | 'text' | 'all' = 'additions text';
+  @Input() ariaRelevant: 'additions' | 'removals' | 'text' | 'all' = 'additions';
 
   constructor(private el: ElementRef<HTMLElement>) {}
 

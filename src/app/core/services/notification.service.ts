@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { ApiService } from './api.service';
+import { WebSocketService } from './websocket.service';
+import { AuthService } from './auth.service';
 
 export type NotificationType = 'ORDER' | 'SUBSCRIPTION' | 'PAYMENT' | 'SYSTEM' | 'PROMOTION';
 
@@ -33,8 +35,48 @@ export interface CreateNotificationRequest {
 export class NotificationService {
   private notificationsUpdatedSubject = new BehaviorSubject<void>(undefined);
   public notificationsUpdated$ = this.notificationsUpdatedSubject.asObservable();
+  
+  private websocketSubscription?: Subscription;
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private webSocketService: WebSocketService,
+    private authService: AuthService
+  ) {
+    // Subscribe to WebSocket notifications
+    this.websocketSubscription = this.webSocketService.notifications$.subscribe(notification => {
+      // Emit update event when notification is received via WebSocket
+      this.notificationsUpdatedSubject.next(undefined);
+    });
+    
+    // Connect WebSocket when user is authenticated
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.connectWebSocket(user.id, user.accountId || undefined);
+      } else {
+        this.disconnectWebSocket();
+      }
+    });
+  }
+
+  /**
+   * Connect to WebSocket for real-time notifications
+   */
+  private connectWebSocket(userId: string, accountId?: string): void {
+    try {
+      this.webSocketService.connect(userId, accountId);
+    } catch (error) {
+      console.error('Failed to connect WebSocket:', error);
+      // Don't throw - allow app to continue without WebSocket
+    }
+  }
+
+  /**
+   * Disconnect from WebSocket
+   */
+  private disconnectWebSocket(): void {
+    this.webSocketService.disconnect();
+  }
 
   /**
    * Get all notifications for the authenticated user

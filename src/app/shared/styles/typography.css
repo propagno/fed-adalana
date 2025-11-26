@@ -106,15 +106,15 @@
 
 /* Cores de texto baseadas no design system */
 .text-primary {
-  color: var(--adalana-dark-blue);
+  color: var(--color-primary);
 }
 
 .text-secondary {
-  color: var(--adalana-light-blue);
+  color: var(--color-secondary);
 }
 
 .text-accent {
-  color: var(--adalana-pink);
+  color: var(--color-accent);
 }
 
 .text-muted {

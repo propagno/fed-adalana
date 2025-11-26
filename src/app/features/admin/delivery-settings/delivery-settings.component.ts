@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
 import { CardComponent } from '../../../shared/components/design-system/card/card.component';
@@ -8,13 +9,13 @@ import { PageHeaderComponent } from '../../../shared/components/design-system/pa
 import { DeliveryService, DeliverySettings } from '../../../core/services/delivery.service';
 import { AccountService } from '../../../core/services/account.service';
 import { ToastService } from '../../../shared/services/toast.service';
-import { CepService } from '../../../core/services/cep.service';
 
 @Component({
   selector: 'app-delivery-settings',
   standalone: true,
   imports: [
-    CommonModule, 
+    CommonModule,
+    RouterModule,
     FormsModule, 
     ReactiveFormsModule, 
     ButtonComponent, 
@@ -35,16 +36,9 @@ export class DeliverySettingsComponent implements OnInit {
     private deliveryService: DeliveryService,
     private accountService: AccountService,
     private toastService: ToastService,
-    private cepService: CepService,
     private fb: FormBuilder
   ) {
     this.deliveryForm = this.fb.group({
-      originCep: [''],
-      originStreet: [''],
-      originNumber: [''],
-      originNeighborhood: [''],
-      originCity: [''],
-      originState: [''],
       pricePerKm: [0, [Validators.required, Validators.min(0)]],
       maxDeliveryRadiusKm: [50, [Validators.required, Validators.min(1)]],
       minimumOrderValue: [0, [Validators.min(0)]]
@@ -77,9 +71,7 @@ export class DeliverySettingsComponent implements OnInit {
         this.deliveryForm.patchValue({
           pricePerKm: settings.pricePerKm || 0,
           maxDeliveryRadiusKm: settings.maxDeliveryRadiusKm || 50,
-          minimumOrderValue: settings.minimumOrderValue || 0,
-          originStreet: settings.originAddress || '',
-          originCep: this.extractCepFromAddress(settings.originAddress)
+          minimumOrderValue: settings.minimumOrderValue || 0
         });
         this.loading = false;
       },
@@ -89,32 +81,6 @@ export class DeliverySettingsComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  searchOriginCep(): void {
-    const cep = this.deliveryForm.get('originCep')?.value?.replace(/\D/g, '');
-    if (!cep || cep.length !== 8) return;
-    
-    this.cepService.searchCep(cep).subscribe({
-      next: (address) => {
-        this.deliveryForm.patchValue({
-          originStreet: address.logradouro || '',
-          originNeighborhood: address.bairro || '',
-          originCity: address.localidade || '',
-          originState: address.uf || ''
-        });
-      },
-      error: () => {
-        // Silently fail - CEP might be invalid
-      }
-    });
-  }
-
-  extractCepFromAddress(address: string | undefined): string {
-    if (!address) return '';
-    // Try to extract CEP from address string
-    const cepMatch = address.match(/\d{5}-?\d{3}/);
-    return cepMatch ? cepMatch[0] : '';
   }
 
   calculateExampleFee(): string {
@@ -134,25 +100,15 @@ export class DeliverySettingsComponent implements OnInit {
     this.saving = true;
     const formValue = this.deliveryForm.value;
     
-    // Build origin address string
-    const addressParts = [
-      formValue.originStreet,
-      formValue.originNumber,
-      formValue.originNeighborhood,
-      formValue.originCity,
-      formValue.originState,
-      formValue.originCep
-    ].filter(p => p);
-    const originAddress = addressParts.join(', ');
-    
+    // O endereço de origem é buscado automaticamente do cadastro da empresa
     const settings: DeliverySettings = {
       accountId: this.accountId!,
       pricePerKm: formValue.pricePerKm,
       maxDeliveryRadiusKm: formValue.maxDeliveryRadiusKm,
       minimumOrderValue: formValue.minimumOrderValue || 0,
-      originAddress: originAddress || '',
-      originLatitude: 0, // Default or need to geocode
-      originLongitude: 0 // Default or need to geocode
+      originAddress: '', // Não é mais necessário, será buscado do Account
+      originLatitude: 0,
+      originLongitude: 0
     };
     
     this.deliveryService.updateDeliverySettings(this.accountId, settings).subscribe({

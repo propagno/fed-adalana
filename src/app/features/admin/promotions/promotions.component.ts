@@ -10,7 +10,7 @@ import { DataListComponent } from '../../../shared/components/design-system/data
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { CardComponent } from '../../../shared/components/design-system/card/card.component';
 import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
-import { BadgeComponent } from '../../../shared/components/design-system/badge/badge.component';
+import { BadgeComponent, BadgeVariant } from '../../../shared/components/design-system/badge/badge.component';
 
 @Component({
   selector: 'app-promotions',
@@ -226,6 +226,55 @@ export class PromotionsComponent implements OnInit {
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
+  }
+
+  /**
+   * Calcula o status real da promoção considerando:
+   * - Se está ativa manualmente (active flag)
+   * - Se está dentro do período de validade (start_date e end_date)
+   * - Se já venceu (end_date passou)
+   */
+  getPromotionStatus(promotion: Promotion): { label: string; variant: BadgeVariant } {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const startDate = new Date(promotion.start_date);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(promotion.end_date);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Se não está ativa manualmente
+    if (!promotion.active) {
+      return { label: 'Inativa', variant: 'error' };
+    }
+
+    // Se ainda não começou
+    if (today < startDate) {
+      return { label: 'Aguardando', variant: 'warning' };
+    }
+
+    // Se já venceu
+    if (today > endDate) {
+      return { label: 'Vencida', variant: 'error' };
+    }
+
+    // Se está dentro do período e ativa
+    return { label: 'Ativa', variant: 'success' };
+  }
+
+  /**
+   * Verifica se a promoção pode ser desativada (não está vencida)
+   */
+  canTogglePromotion(promotion: Promotion): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(promotion.end_date);
+    endDate.setHours(23, 59, 59, 999);
+
+    // Se já venceu, não pode mais ser ativada/desativada
+    return today <= endDate;
   }
 }
 

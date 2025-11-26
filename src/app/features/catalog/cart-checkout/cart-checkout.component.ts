@@ -684,19 +684,27 @@ export class CartCheckoutComponent implements OnInit, OnDestroy {
       ? !!this.selectedAddressId && !!this.formData.customerAddress && this.formData.customerAddress.trim().length > 0
       : !!this.formData.customerAddress && this.formData.customerAddress.trim().length >= 15;
     
+    // Validate delivery fee: if fee calculation failed, block checkout
+    // Only allow checkout if:
+    // 1. Frete foi calculado com sucesso (deliveryFee > 0 e sem erro), OU
+    // 2. Frete está sendo calculado (loadingFee = true), OU
+    // 3. Endereço ainda não foi preenchido (não tentou calcular ainda)
+    const hasValidDeliveryFee = !this.feeError && (this.deliveryFee > 0 || !this.formData.customerAddress || this.loadingFee);
+    
     // If authenticated, fields are optional (backend will auto-fill)
-    // But address is always required
+    // But address is always required, and delivery fee must be valid
     if (this.isAuthenticated) {
-      return !!this.deliveryDate && hasValidAddress;
+      return !!this.deliveryDate && hasValidAddress && hasValidDeliveryFee;
     }
     
-    // If not authenticated, all fields are required
+    // If not authenticated, all fields are required, and delivery fee must be valid
     return !!(
       this.deliveryDate &&
       this.formData.customerName &&
       this.formData.customerEmail &&
       this.formData.customerPhone &&
-      hasValidAddress
+      hasValidAddress &&
+      hasValidDeliveryFee
     );
   }
 
@@ -714,8 +722,20 @@ export class CartCheckoutComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate delivery fee before checkout
+    if (this.feeError) {
+      this.error = `Não é possível finalizar o pedido: ${this.feeError}. Por favor, verifique o endereço de entrega ou entre em contato com o suporte.`;
+      return;
+    }
+
+    // If address is filled but delivery fee is 0 and not loading, it means calculation failed
+    if (this.formData.customerAddress && this.deliveryFee === 0 && !this.loadingFee && !this.hasFreeShipping) {
+      this.error = 'Não foi possível calcular o frete para este endereço. Por favor, verifique o endereço ou entre em contato com o suporte.';
+      return;
+    }
+
     if (!this.isFormValid()) {
-      this.error = 'Por favor, preencha todos os campos obrigatórios';
+      this.error = 'Por favor, preencha todos os campos obrigatórios e aguarde o cálculo do frete';
       return;
     }
 
@@ -739,7 +759,7 @@ export class CartCheckoutComponent implements OnInit, OnDestroy {
       customer_address: this.formData.customerAddress || undefined,
       payment_method: this.formData.paymentMethod,
       notes: this.formData.notes?.trim() || undefined,
-      promotion_code: this.cart.promotionCode,
+      promotion_code: this.cart.promotionCode || (this.couponApplied ? this.couponCode.trim().toUpperCase() : undefined),
       delivery_fee_cents: this.deliveryFee > 0 ? this.deliveryFee : undefined
     };
 

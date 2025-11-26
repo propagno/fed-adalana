@@ -1,8 +1,12 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpInterceptorFn, HttpErrorResponse, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { catchError, throwError, switchMap } from 'rxjs';
+import { catchError, throwError, switchMap, BehaviorSubject, filter, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+
+// Flag global para evitar múltiplas requisições de refresh simultâneas
+let isRefreshing = false;
+let refreshTokenSubject: BehaviorSubject<string | null> | null = null;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -28,18 +32,52 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (error.status === 401) {
         const url = error.url || '';
         const isLoginEndpoint = url.includes('/auth/login') || url.includes('/auth/register');
+        const isRefreshEndpoint = url.includes('/auth/refresh');
         
         // Se for erro de login/registro, não fazer logout (usuário nem está logado)
         if (isLoginEndpoint) {
           return throwError(() => error);
         }
         
+        // Se for erro na própria requisição de refresh, fazer logout para evitar loop
+        if (isRefreshEndpoint) {
+          authService.logout();
+          router.navigate(['/auth/login']);
+          return throwError(() => error);
+        }
+        
         const refreshToken = localStorage.getItem('refresh_token');
         
         if (refreshToken) {
-          // Try to refresh token
+          // Se já está fazendo refresh, aguardar o resultado
+          if (isRefreshing && refreshTokenSubject) {
+            return refreshTokenSubject.pipe(
+              filter(token => token !== null),
+              take(1),
+              switchMap((newToken) => {
+                // Retry original request with new token
+                const newAuthReq = req.clone({
+                  setHeaders: {
+                    Authorization: `Bearer ${newToken}`
+                  }
+                });
+                return next(newAuthReq);
+              })
+            );
+          }
+          
+          // Iniciar processo de refresh
+          isRefreshing = true;
+          refreshTokenSubject = new BehaviorSubject<string | null>(null);
+          
           return authService.refreshToken().pipe(
             switchMap((response) => {
+              // Atualizar flag e subject
+              isRefreshing = false;
+              refreshTokenSubject?.next(response.access_token);
+              refreshTokenSubject?.complete();
+              refreshTokenSubject = null;
+              
               // Retry original request with new token
               const newAuthReq = req.clone({
                 setHeaders: {
@@ -49,7 +87,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               return next(newAuthReq);
             }),
             catchError((refreshError) => {
-              // Refresh failed, logout user
+              // Refresh failed, limpar flags e fazer logout
+              isRefreshing = false;
+              refreshTokenSubject?.next(null);
+              refreshTokenSubject?.complete();
+              refreshTokenSubject = null;
+              
               authService.logout();
               router.navigate(['/auth/login']);
               return throwError(() => refreshError);

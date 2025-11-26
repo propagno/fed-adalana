@@ -468,6 +468,8 @@ export class CustomerProfileComponent implements OnInit {
     };
   }
   
+
+  
   closeAddressModal(): void {
     this.showAddressModal = false;
     this.editingAddress = null;
@@ -671,5 +673,20 @@ export class CustomerProfileComponent implements OnInit {
     if (this.passwordStrength <= 4) return 'bg-yellow-500';
     return 'bg-green-500';
   }
-}
+  
+  getPasswordStrengthColorText(): string {
+    if (this.passwordStrength <= 2) return 'text-error';
+    if (this.passwordStrength <= 3) return 'text-warning';
+    return 'text-success';
+  }
 
+  getUserInitials(): string {
+    const name = this.personalForm.get('name')?.value || '';
+    return name
+      .split(' ')
+      .map((n: string) => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+  }
+}

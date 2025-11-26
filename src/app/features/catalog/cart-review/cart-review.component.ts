@@ -11,14 +11,12 @@ import { MarketplaceNavbarComponent } from '../../../shared/components/navbar/ma
 import { ProgressIndicatorComponent, ProgressStep } from '../../../shared/components/progress/progress-indicator.component';
 import { CardComponent } from '../../../shared/components/design-system/card/card.component';
 import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
-import { InputComponent } from '../../../shared/components/design-system/input/input.component';
 import { MapPinIconComponent } from '../../../shared/components/icons/map-pin-icon.component';
-import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-cart-review',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent, SkeletonLoaderComponent, MarketplaceNavbarComponent, ProgressIndicatorComponent, CardComponent, ButtonComponent, InputComponent, MapPinIconComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, SkeletonLoaderComponent, MarketplaceNavbarComponent, ProgressIndicatorComponent, CardComponent, ButtonComponent, MapPinIconComponent],
   template: `
     <div class="min-h-screen bg-background">
       <!-- Marketplace Navbar -->
@@ -151,48 +149,6 @@ import { AuthService } from '../../../core/services/auth.service';
                 </div>
               </div>
             </app-card>
-
-            <!-- Promotion Code -->
-            <app-card [elevation]="1" padding="md" customClass="bg-white">
-              <h2 class="text-lg md:text-h2 font-display font-semibold text-gray-900 mb-4 md:mb-6">Código Promocional</h2>
-              
-              <div *ngIf="!cart.promotionCode" class="flex flex-col sm:flex-row gap-3">
-                <app-input
-                  inputId="promotionCode"
-                  [(ngModel)]="promotionCode"
-                  name="promotionCode"
-                  placeholder="Digite o código"
-                  [fullWidth]="true">
-                </app-input>
-                <app-button 
-                  variant="primary"
-                  size="md"
-                  label="Aplicar"
-                  [disabled]="applyingPromotion || !promotionCode"
-                  (clicked)="applyPromotion()"
-                  ariaLabel="Aplicar código promocional"
-                  [fullWidth]="true"
-                  class="sm:w-auto">
-                </app-button>
-              </div>
-              
-              <app-card *ngIf="cart.promotionCode" variant="highlighted" [elevation]="0" padding="md" customClass="border-l-4 border-success">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                  <div>
-                    <p class="text-base md:text-h4 font-semibold text-success mb-1">Código aplicado: {{ cart.promotionCode }}</p>
-                    <p class="text-body-sm text-gray-600">Desconto: {{ formatCurrency(cart.discountAmountCents) }}</p>
-                  </div>
-                  <app-button 
-                    variant="ghost"
-                    size="sm"
-                    label="Remover"
-                    (clicked)="removePromotion()"
-                    ariaLabel="Remover código promocional"
-                    class="sm:w-auto">
-                  </app-button>
-                </div>
-              </app-card>
-            </app-card>
           </div>
 
           <!-- Summary - Sticky on mobile -->
@@ -246,8 +202,6 @@ export class CartReviewComponent implements OnInit {
   cart: CartResponse | null = null;
   loading = true;
   error: string | null = null;
-  promotionCode = '';
-  applyingPromotion = false;
   
   progressSteps: ProgressStep[] = [
     { id: 'review', label: 'Revisar', completed: true },
@@ -354,38 +308,6 @@ export class CartReviewComponent implements OnInit {
       },
       error: (err) => {
         this.error = err.error?.message || 'Erro ao remover item';
-      }
-    });
-  }
-
-  applyPromotion(): void {
-    if (!this.accountId || !this.promotionCode) return;
-    
-    this.applyingPromotion = true;
-    this.error = null;
-    
-    this.cartService.applyPromotion(this.accountId, this.promotionCode).subscribe({
-      next: (cart) => {
-        this.cart = cart;
-        this.promotionCode = '';
-        this.applyingPromotion = false;
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Erro ao aplicar código promocional';
-        this.applyingPromotion = false;
-      }
-    });
-  }
-
-  removePromotion(): void {
-    if (!this.accountId) return;
-    
-    this.cartService.removePromotion(this.accountId).subscribe({
-      next: (cart) => {
-        this.cart = cart;
-      },
-      error: (err) => {
-        this.error = err.error?.message || 'Erro ao remover promoção';
       }
     });
   }

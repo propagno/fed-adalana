@@ -36,6 +36,7 @@ export interface UserInfo {
   email: string;
   role: string;
   name?: string;
+  emailVerified?: boolean;
 }
 
 export interface UserProfile {
@@ -171,6 +172,10 @@ export class AuthService {
 
   getCurrentUser(): UserInfo | null {
     return this.currentUserSubject.value;
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('access_token');
   }
 
   getCurrentUserProfile(): Observable<UserProfile> {

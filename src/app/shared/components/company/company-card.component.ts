@@ -26,78 +26,74 @@ import { environment } from '../../../../environments/environment';
       [attr.aria-label]="'Empresa ' + company.company_name"
       tabindex="0"
       role="button"
-      class="cursor-pointer overflow-hidden transition-all duration-200 active:shadow-elevation-0 active:scale-[0.98] focus:ring-2 focus:ring-primary focus:ring-offset-2 lg:hover:shadow-elevation-3 lg:hover:scale-[1.01] marketplace-card">
+      class="group cursor-pointer overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-brand-md marketplace-card h-full flex flex-col">
       
       <!-- Company Banner/Image -->
-      <div class="h-40 sm:h-48 relative overflow-hidden" 
-           [style.background]="getBannerStyle()"
-           [style.background-size]="'cover'"
-           [style.background-position]="'center'">
+      <div class="h-48 relative overflow-hidden bg-gray-100">
+        <!-- Banner Image with Zoom Effect -->
+        <div class="absolute inset-0 transition-transform duration-700 group-hover:scale-105"
+             [style.background]="getBannerStyle()"
+             [style.background-size]="'cover'"
+             [style.background-position]="'center'">
+        </div>
+        
+        <!-- Overlay Gradient -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-60"></div>
+
         <div *ngIf="!hasBannerImage()" 
              class="absolute inset-0 flex items-center justify-center">
-          <div class="text-white text-4xl md:text-display font-display opacity-30">{{ company.company_name.charAt(0).toUpperCase() }}</div>
+          <div class="text-white text-5xl font-display opacity-30">{{ company.company_name.charAt(0).toUpperCase() }}</div>
         </div>
         
         <!-- Badges -->
-        <div class="absolute top-2 sm:top-4 right-2 sm:right-4 flex flex-col gap-1.5 sm:gap-2 z-10">
-          <app-badge *ngIf="company.category" variant="neutral" size="sm" [label]="company.category" class="!bg-white !text-primary !border-white/50"></app-badge>
-          <app-badge *ngIf="company.hasSubscriptionClub" variant="accent" size="sm" label="Clube VIP" class="!bg-accent !text-white !border-accent"></app-badge>
-        </div>
+        <div class="absolute top-3 right-3 flex flex-col gap-2 z-10">
+          <app-badge *ngIf="company.hasSubscriptionClub" variant="accent" size="sm" label="Clube VIP" class="!bg-accent !text-white !border-accent shadow-sm"></app-badge>
+          <span *ngIf="company.category" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-primary text-white shadow-md backdrop-blur-sm border border-white/10">
+            {{ company.category }}
+          </span>        </div>
         
-        <div *ngIf="company.distance" class="absolute bottom-2 sm:bottom-4 left-2 sm:left-4 z-10">
-          <app-badge variant="secondary" size="sm" [label]="company.distance + ' km'"></app-badge>
+        <!-- Distance Badge -->
+        <div *ngIf="company.distance" class="absolute bottom-3 right-3 z-10">
+          <app-badge variant="secondary" size="sm" [label]="company.distance + ' km'" class="!bg-black/50 !text-white !backdrop-blur-md !border-white/20"></app-badge>
+        </div>
+
+        <!-- Status Indicator (Mockup) -->
+        <div class="absolute top-3 left-3 z-10">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+          </span>
         </div>
       </div>
       
       <!-- Company Info -->
-      <div class="p-4 md:p-6">
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex-1">
-            <h3 class="text-lg md:text-h4 font-display font-semibold mb-1 text-gray-900">
-              {{ company.company_name }}
-            </h3>
-            <p *ngIf="getTagline()" 
-               class="text-body-sm text-gray-600 mt-1 line-clamp-1">
-              {{ getTagline() }}
-            </p>
-          </div>
-          <svg class="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 flex-shrink-0 ml-2"
-               fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-          <span class="sr-only">Ver detalhes</span>
+      <div class="p-5 flex-1 flex flex-col">
+        <div class="flex items-start justify-between mb-2">
+          <h3 class="text-xl font-display font-bold text-gray-900 leading-tight group-hover:text-primary transition-colors">
+            {{ company.company_name }}
+          </h3>
         </div>
+
+        <p *ngIf="getTagline()" class="text-sm text-gray-500 mb-4 line-clamp-2 min-h-[2.5rem]">
+          {{ getTagline() }}
+        </p>
         
         <!-- Company Details -->
-        <div class="space-y-2 mb-4">
-          <div *ngIf="company.phone" class="flex items-center text-body-sm text-gray-600">
-            <svg class="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            <span>{{ company.phone }}</span>
-          </div>
-          <div *ngIf="company.address" class="flex items-start text-body-sm text-gray-600">
-            <app-map-pin-icon size="sm" variant="filled" color="text-primary" class="mr-2 mt-0.5 flex-shrink-0"></app-map-pin-icon>
-            <span class="line-clamp-2">{{ company.address }}</span>
-          </div>
-          <div *ngIf="company.rating" class="flex items-center text-body-sm text-gray-600">
-            <svg class="w-4 h-4 mr-1 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span class="font-medium">{{ company.rating }}</span>
-            <span *ngIf="company.deliveryTime" class="text-gray-400 ml-1">({{ company.deliveryTime }})</span>
+        <div class="mt-auto space-y-3">
+          <div class="flex items-center justify-between text-sm border-t border-gray-100 pt-3">
+            <div *ngIf="company.rating" class="flex items-center font-medium text-gray-700">
+              <svg class="w-4 h-4 mr-1 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              {{ company.rating }}
+              <span class="text-gray-400 font-normal ml-1">({{ company.deliveryTime || '30-45 min' }})</span>
+            </div>
+            
+            <div class="text-primary font-medium text-xs uppercase tracking-wide">
+              Ver Loja
+            </div>
           </div>
         </div>
-        
-        <!-- Action Button -->
-        <app-button 
-          variant="primary" 
-          size="md"
-          label="Ver Produtos"
-          [fullWidth]="true"
-          [ngStyle]="{'--button-bg': getCompanyPrimaryColor()}"
-          (clicked)="onViewProducts($event)">
-        </app-button>
       </div>
     </app-card>
   `,

@@ -18,6 +18,11 @@ export interface Account {
   category?: string;
   phone?: string;
   address?: string;
+  settings?: {
+    pix_key?: string;
+    pix_key_type?: string;
+    [key: string]: any;
+  };
 }
 
 export interface AddressDTO {
@@ -89,35 +94,42 @@ export class AccountService {
       payload.address = request.address;
     }
     
-    return this.apiService.post<Account>('/accounts', payload);
+    return this.apiService.post<Account>('/api/accounts', payload);
   }
 
   getMyAccount(): Observable<Account> {
-    return this.apiService.get<Account>('/accounts/my-account');
+    return this.apiService.get<Account>('/api/accounts/my-account');
   }
 
   getAllAccounts(): Observable<Account[]> {
-    return this.apiService.get<Account[]>('/accounts');
+    return this.apiService.get<Account[]>('/api/accounts');
   }
 
   getAccountById(id: string): Observable<Account> {
-    return this.apiService.get<Account>(`/accounts/${id}`);
+    return this.apiService.get<Account>(`/api/accounts/${id}`);
   }
 
   updateAccount(id: string, data: Partial<Account>): Observable<Account> {
-    return this.apiService.put<Account>(`/accounts/${id}`, data);
+    return this.apiService.put<Account>(`/api/accounts/${id}`, data);
   }
 
   activateAccount(id: string): Observable<Account> {
-    return this.apiService.patch<Account>(`/accounts/${id}/activate`, {});
+    return this.apiService.patch<Account>(`/api/accounts/${id}/activate`, {});
   }
 
   deactivateAccount(id: string): Observable<Account> {
-    return this.apiService.patch<Account>(`/accounts/${id}/deactivate`, {});
+    return this.apiService.patch<Account>(`/api/accounts/${id}/deactivate`, {});
   }
 
   getMetrics(): Observable<AccountMetrics> {
-    return this.apiService.get<AccountMetrics>('/accounts/metrics');
+    return this.apiService.get<AccountMetrics>('/api/accounts/metrics');
+  }
+
+  updatePixKey(accountId: string, pixKey: string, pixKeyType: string): Observable<void> {
+    return this.apiService.patch<void>(`/api/accounts/${accountId}/settings/pix-key`, {
+      pix_key: pixKey,
+      pix_key_type: pixKeyType
+    });
   }
 }
 

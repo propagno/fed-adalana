@@ -1,51 +1,65 @@
-<div class="min-h-screen bg-background">
-  <app-marketplace-navbar></app-marketplace-navbar>
+<div class="min-h-screen bg-background pb-12">
+  <app-marketplace-navbar class="fixed top-0 w-full z-navbar"></app-marketplace-navbar>
   
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
-    <app-page-header
-      title="Meu Perfil"
-      description="Gerencie suas informações pessoais, endereços e segurança"
-      [showActions]="false">
-    </app-page-header>
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-24 max-w-5xl">
+    
+    <!-- Header -->
+    <div class="mb-8 animate-fade-in">
+      <h1 class="text-3xl font-display font-bold text-gray-900 mb-2">Meu Perfil</h1>
+      <p class="text-lg text-gray-600">Gerencie suas informações pessoais, endereços e segurança.</p>
+    </div>
 
-    <!-- Tabs -->
-    <div class="mb-6 border-b border-gray-200 overflow-x-auto">
-      <nav class="flex space-x-8" aria-label="Tabs">
+    <!-- Modern Tabs -->
+    <div class="mb-8 bg-white p-1.5 rounded-2xl shadow-sm border border-gray-100 inline-flex overflow-x-auto max-w-full animate-slide-up">
+      <nav class="flex space-x-2" aria-label="Tabs">
         <button
           (click)="onTabChange('personal')"
-          [class.border-primary]="activeTab === 'personal'"
-          [class.text-primary]="activeTab === 'personal'"
-          [class.border-transparent]="activeTab !== 'personal'"
-          [class.text-gray-500]="activeTab !== 'personal'"
-          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors hover:text-primary focus:outline-none">
+          [class.bg-primary]="activeTab === 'personal'"
+          [class.text-white]="activeTab === 'personal'"
+          [class.text-gray-600]="activeTab !== 'personal'"
+          [class.hover:bg-gray-50]="activeTab !== 'personal'"
+          class="px-6 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 focus:outline-none flex items-center gap-2 whitespace-nowrap">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
           Dados Pessoais
         </button>
         <button
           (click)="onTabChange('addresses')"
-          [class.border-primary]="activeTab === 'addresses'"
-          [class.text-primary]="activeTab === 'addresses'"
-          [class.border-transparent]="activeTab !== 'addresses'"
-          [class.text-gray-500]="activeTab !== 'addresses'"
-          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors hover:text-primary focus:outline-none">
+          [class.bg-primary]="activeTab === 'addresses'"
+          [class.text-white]="activeTab === 'addresses'"
+          [class.text-gray-600]="activeTab !== 'addresses'"
+          [class.hover:bg-gray-50]="activeTab !== 'addresses'"
+          class="px-6 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 focus:outline-none flex items-center gap-2 whitespace-nowrap">
+          <app-map-pin-icon size="sm" [variant]="activeTab === 'addresses' ? 'filled' : 'outline'" [color]="activeTab === 'addresses' ? 'text-white' : 'text-gray-600'"></app-map-pin-icon>
           Endereços
         </button>
         <button
           (click)="onTabChange('security')"
-          [class.border-primary]="activeTab === 'security'"
-          [class.text-primary]="activeTab === 'security'"
-          [class.border-transparent]="activeTab !== 'security'"
-          [class.text-gray-500]="activeTab !== 'security'"
-          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors hover:text-primary focus:outline-none">
+          [class.bg-primary]="activeTab === 'security'"
+          [class.text-white]="activeTab === 'security'"
+          [class.text-gray-600]="activeTab !== 'security'"
+          [class.hover:bg-gray-50]="activeTab !== 'security'"
+          class="px-6 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 focus:outline-none flex items-center gap-2 whitespace-nowrap">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
           Segurança
         </button>
       </nav>
     </div>
 
     <!-- Personal Data Tab -->
-    <div *ngIf="activeTab === 'personal'" class="space-y-6 animate-fade-in">
-      <app-card variant="default" [elevation]="1" padding="lg">
-        <form [formGroup]="personalForm" (ngSubmit)="onPersonalSubmit()" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div *ngIf="activeTab === 'personal'" class="animate-slide-up" style="animation-delay: 100ms">
+      <app-card variant="default" [elevation]="1" padding="lg" customClass="border border-gray-100">
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+          <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary text-2xl font-bold">
+            {{ getUserInitials() }}
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Informações Básicas</h2>
+            <p class="text-gray-500 text-sm">Atualize seus dados de identificação e contato.</p>
+          </div>
+        </div>
+
+        <form [formGroup]="personalForm" (ngSubmit)="onPersonalSubmit()" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <app-input
               formControlName="name"
               label="Nome completo"
@@ -85,60 +99,80 @@
             </app-input>
           </div>
 
-          <div class="flex justify-end pt-4">
+          <div class="flex justify-end pt-6 border-t border-gray-100">
             <app-button
               type="submit"
               variant="primary"
+              size="lg"
               [loading]="personalLoading"
               [disabled]="personalForm.invalid || personalLoading"
               label="Salvar Alterações">
             </app-button>
           </div>
 
-          <div *ngIf="personalError" class="mt-4 p-3 bg-error/10 border border-error/20 rounded-medium text-error text-body-sm">
-            {{ personalError }}
+          <div *ngIf="personalError" class="p-4 bg-error/5 border border-error/20 rounded-xl flex items-center gap-3 text-error">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span class="text-sm font-medium">{{ personalError }}</span>
           </div>
         </form>
       </app-card>
     </div>
 
     <!-- Addresses Tab -->
-    <div *ngIf="activeTab === 'addresses'" class="space-y-6 animate-fade-in">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-h4 text-primary">Meus Endereços</h3>
+    <div *ngIf="activeTab === 'addresses'" class="animate-slide-up" style="animation-delay: 100ms">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h2 class="text-xl font-bold text-gray-900">Meus Endereços</h2>
+          <p class="text-gray-500 text-sm">Gerencie seus locais de entrega.</p>
+        </div>
         <app-button 
           variant="primary" 
-          size="sm" 
-          label="+ Adicionar Endereço" 
+          size="md" 
+          label="+ Novo Endereço" 
           (clicked)="openAddressModal()">
         </app-button>
       </div>
 
-      <div *ngIf="addressesLoading" class="text-center py-8">
-        <app-skeleton-loader type="card"></app-skeleton-loader>
+      <div *ngIf="addressesLoading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <app-skeleton-loader *ngFor="let i of [1,2]" type="card"></app-skeleton-loader>
       </div>
 
-      <div *ngIf="!addressesLoading && addresses.length === 0" class="text-center py-12 bg-gray-50 rounded-large border border-dashed border-gray-300">
-        <app-map-pin-icon size="xl" variant="outline" color="text-gray-400" class="mx-auto mb-4"></app-map-pin-icon>
-        <p class="text-gray-600 mb-4">Você ainda não possui endereços cadastrados</p>
-        <app-button variant="outline" label="Adicionar primeiro endereço" (clicked)="openAddressModal()">
+      <div *ngIf="!addressesLoading && addresses.length === 0" class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+          <app-map-pin-icon size="xl" variant="outline" color="text-gray-400"></app-map-pin-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Nenhum endereço cadastrado</h3>
+        <p class="text-gray-500 mb-6">Adicione um endereço para receber seus pedidos.</p>
+        <app-button variant="outline" label="Adicionar Endereço" (clicked)="openAddressModal()">
         </app-button>
       </div>
 
-      <div *ngIf="!addressesLoading && addresses.length > 0" class="grid gap-4 md:grid-cols-2">
-        <app-card *ngFor="let address of addresses" variant="default" [elevation]="1" padding="md" customClass="h-full flex flex-col">
-          <div class="flex justify-between items-start mb-3 flex-1">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <h4 class="text-body-lg font-semibold text-primary">{{ address.label }}</h4>
-                <app-badge *ngIf="address.is_default" variant="info" size="sm" label="Padrão"></app-badge>
+      <div *ngIf="!addressesLoading && addresses.length > 0" class="grid gap-6 md:grid-cols-2">
+        <app-card *ngFor="let address of addresses" 
+                  variant="interactive" 
+                  [elevation]="1" 
+                  padding="lg" 
+                  customClass="h-full flex flex-col border border-gray-100 hover:border-primary/30 transition-all group">
+          <div class="flex justify-between items-start mb-4 flex-1">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                <app-map-pin-icon size="sm" variant="filled" color="currentColor"></app-map-pin-icon>
               </div>
-              <p class="text-body-sm text-gray-600">{{ address.address }}</p>
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="text-lg font-bold text-gray-900">{{ address.label }}</h4>
+                  <app-badge *ngIf="address.is_default" variant="success" size="sm" label="Padrão" class="!bg-success/10 !text-success"></app-badge>
+                </div>
+                <p class="text-gray-600 text-sm leading-relaxed">
+                  {{ address.address }}
+                </p>
+              </div>
             </div>
           </div>
-          <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+          
+          <div class="flex gap-2 mt-6 pt-4 border-t border-gray-50 opacity-0 group-hover:opacity-100 transition-opacity">
             <app-button
-              variant="outline"
+              variant="secondary"
               size="sm"
               label="Editar"
               [fullWidth]="true"
@@ -155,7 +189,7 @@
             <app-button
               variant="danger"
               size="sm"
-              label="Remover"
+              label="Excluir"
               [fullWidth]="true"
               (clicked)="deleteAddress(address)">
             </app-button>
@@ -201,7 +235,7 @@
               [required]="true"
               [errorMessage]="addressForm.get('cep')?.hasError('required') ? 'CEP é obrigatório' : (addressForm.get('cep')?.hasError('pattern') ? 'CEP inválido' : '')">
             </app-input>
-            <p *ngIf="loadingCep" class="mt-1 text-xs text-blue-600">Buscando endereço...</p>
+            <p *ngIf="loadingCep" class="mt-1 text-xs text-primary animate-pulse">Buscando endereço...</p>
           </div>
 
           <!-- Endereço (Rua/Logradouro) -->
@@ -257,13 +291,13 @@
             </app-input>
           </div>
 
-          <div class="flex items-center mt-2">
+          <div class="flex items-center mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <input
               type="checkbox"
               id="is_default"
               formControlName="is_default"
               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-            <label for="is_default" class="ml-2 text-body-sm text-gray-700 cursor-pointer">
+            <label for="is_default" class="ml-2 text-sm font-medium text-gray-700 cursor-pointer select-none">
               Definir como endereço padrão
             </label>
           </div>
@@ -272,11 +306,19 @@
     </div>
 
     <!-- Security Tab -->
-    <div *ngIf="activeTab === 'security'" class="space-y-6 animate-fade-in">
-      <app-card variant="default" [elevation]="1" padding="lg">
-        <h3 class="text-h4 text-primary mb-4">Alterar Senha</h3>
+    <div *ngIf="activeTab === 'security'" class="animate-slide-up" style="animation-delay: 100ms">
+      <app-card variant="default" [elevation]="1" padding="lg" customClass="border border-gray-100">
+        <div class="flex items-center gap-4 mb-8 pb-6 border-b border-gray-100">
+          <div class="w-16 h-16 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">Segurança da Conta</h2>
+            <p class="text-gray-500 text-sm">Mantenha sua conta segura atualizando sua senha periodicamente.</p>
+          </div>
+        </div>
         
-        <form [formGroup]="securityForm" (ngSubmit)="onSecuritySubmit()" class="space-y-4">
+        <form [formGroup]="securityForm" (ngSubmit)="onSecuritySubmit()" class="space-y-6 max-w-lg">
           <app-input
             formControlName="currentPassword"
             type="password"
@@ -286,28 +328,41 @@
             [errorMessage]="securityForm.get('currentPassword')?.hasError('required') ? 'Senha atual é obrigatória' : ''">
           </app-input>
 
-          <app-input
-            formControlName="newPassword"
-            type="password"
-            label="Nova senha"
-            placeholder="Mínimo 8 caracteres"
-            [required]="true"
-            (input)="onPasswordInput()"
-            [errorMessage]="securityForm.get('newPassword')?.hasError('required') ? 'Nova senha é obrigatória' : 
-                           securityForm.get('newPassword')?.hasError('minlength') ? 'Senha deve ter pelo menos 8 caracteres' : ''">
-          </app-input>
+          <div class="space-y-2">
+            <app-input
+              formControlName="newPassword"
+              type="password"
+              label="Nova senha"
+              placeholder="Mínimo 8 caracteres"
+              [required]="true"
+              (input)="onPasswordInput()"
+              [errorMessage]="securityForm.get('newPassword')?.hasError('required') ? 'Nova senha é obrigatória' : 
+                             securityForm.get('newPassword')?.hasError('minlength') ? 'Senha deve ter pelo menos 8 caracteres' : ''">
+            </app-input>
 
-          <!-- Password Strength Indicator -->
-          <div *ngIf="securityForm.get('newPassword')?.value" class="space-y-2">
-            <div class="flex items-center gap-2">
-              <div class="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  [class]="getPasswordStrengthColor()"
-                  [style.width.%]="(passwordStrength / 5) * 100"
-                  class="h-full transition-all duration-300">
+            <!-- Password Strength Indicator -->
+            <div *ngIf="securityForm.get('newPassword')?.value" class="pt-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-xs font-medium text-gray-500">Força da senha:</span>
+                <span class="text-xs font-bold" [class]="getPasswordStrengthColorText()">{{ getPasswordStrengthLabel() }}</span>
+              </div>
+              <div class="flex gap-1 h-1.5">
+                <div class="flex-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div [class]="passwordStrength >= 1 ? getPasswordStrengthColor() : 'bg-transparent'" class="h-full w-full transition-colors duration-300"></div>
+                </div>
+                <div class="flex-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div [class]="passwordStrength >= 2 ? getPasswordStrengthColor() : 'bg-transparent'" class="h-full w-full transition-colors duration-300"></div>
+                </div>
+                <div class="flex-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div [class]="passwordStrength >= 3 ? getPasswordStrengthColor() : 'bg-transparent'" class="h-full w-full transition-colors duration-300"></div>
+                </div>
+                <div class="flex-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div [class]="passwordStrength >= 4 ? getPasswordStrengthColor() : 'bg-transparent'" class="h-full w-full transition-colors duration-300"></div>
+                </div>
+                <div class="flex-1 rounded-full bg-gray-100 overflow-hidden">
+                  <div [class]="passwordStrength >= 5 ? getPasswordStrengthColor() : 'bg-transparent'" class="h-full w-full transition-colors duration-300"></div>
                 </div>
               </div>
-              <span class="text-body-sm text-gray-600">{{ getPasswordStrengthLabel() }}</span>
             </div>
           </div>
 
@@ -321,18 +376,20 @@
                            securityForm.get('confirmPassword')?.hasError('passwordMismatch') ? 'As senhas não coincidem' : ''">
           </app-input>
 
-          <div class="flex justify-end pt-4">
+          <div class="flex justify-end pt-6 border-t border-gray-100">
             <app-button
               type="submit"
               variant="primary"
+              size="lg"
               [loading]="securityLoading"
               [disabled]="securityForm.invalid || securityLoading"
               label="Alterar Senha">
             </app-button>
           </div>
 
-          <div *ngIf="securityError" class="mt-4 p-3 bg-error/10 border border-error/20 rounded-medium text-error text-body-sm">
-            {{ securityError }}
+          <div *ngIf="securityError" class="p-4 bg-error/5 border border-error/20 rounded-xl flex items-center gap-3 text-error">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span class="text-sm font-medium">{{ securityError }}</span>
           </div>
         </form>
       </app-card>

@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'danger';
+export type ButtonVariant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'danger' | 'error' | 'success' | 'warning';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({
@@ -55,11 +55,14 @@ export class ButtonComponent {
     const baseClasses = 'inline-flex items-center justify-center font-medium rounded-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]';
     
     // Mobile-first: active e focus para touch, hover apenas desktop
-    const variantClasses = {
+    const variantClasses: Record<ButtonVariant, string> = {
       primary: 'bg-primary text-white active:scale-95 active:bg-[#0E1117] focus:ring-primary lg:hover:shadow-elevation-3 lg:hover:scale-[1.02]',
       secondary: 'bg-secondary text-white active:scale-95 active:bg-[#E6392E] focus:ring-secondary lg:hover:shadow-elevation-3 lg:hover:scale-[1.02]',
       accent: 'bg-accent text-white active:scale-95 active:bg-[#E6B201] focus:ring-accent lg:hover:shadow-elevation-3 lg:hover:scale-[1.02]',
       danger: 'bg-error text-white active:scale-95 active:bg-[#E6392E] focus:ring-error lg:hover:shadow-elevation-3',
+      error: 'bg-error text-white active:scale-95 active:bg-[#E6392E] focus:ring-error lg:hover:shadow-elevation-3',
+      success: 'bg-green-600 text-white active:scale-95 active:bg-green-700 focus:ring-green-500 lg:hover:shadow-elevation-3 lg:hover:scale-[1.02]',
+      warning: 'bg-yellow-500 text-white active:scale-95 active:bg-yellow-600 focus:ring-yellow-400 lg:hover:shadow-elevation-3 lg:hover:scale-[1.02]',
       ghost: 'bg-white/10 backdrop-blur-sm text-primary active:bg-white/20 focus:ring-primary lg:hover:bg-white/20',
       outline: 'bg-transparent border-2 border-primary text-primary active:bg-primary active:text-white active:scale-95 focus:ring-primary lg:hover:bg-primary lg:hover:text-white',
     };

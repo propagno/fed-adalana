@@ -8,52 +8,17 @@
   <app-card variant="default" [elevation]="1" padding="lg">
     <h2 class="text-h2 mb-6">Configurações de Entrega</h2>
     
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <p class="text-body-sm text-blue-800">
+        <strong>Nota:</strong> O endereço de origem é obtido automaticamente do cadastro da empresa. 
+        Certifique-se de que o endereço da empresa está completo e atualizado no 
+        <a routerLink="/admin/profile" class="text-primary-light underline hover:text-primary">Perfil da Empresa</a>.
+      </p>
+    </div>
+    
     <form [formGroup]="deliveryForm" class="space-y-6" (ngSubmit)="saveSettings()">
-      <!-- Endereço de Origem -->
-      <div>
-        <h3 class="text-h3 mb-4">Endereço de Origem</h3>
-        <p class="text-body-sm text-gray-600 mb-4">
-          Este é o endereço de onde as entregas partem. Usado para calcular distância.
-        </p>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <app-input formControlName="originCep"
-                     label="CEP"
-                     mask="00000-000"
-                     (blur)="searchOriginCep()"
-                     placeholder="00000-000">
-          </app-input>
-          
-          <app-input formControlName="originStreet"
-                     label="Logradouro"
-                     placeholder="Rua, Avenida, etc.">
-          </app-input>
-          
-          <app-input formControlName="originNumber"
-                     label="Número"
-                     placeholder="123">
-          </app-input>
-          
-          <app-input formControlName="originNeighborhood"
-                     label="Bairro"
-                     placeholder="Nome do bairro">
-          </app-input>
-          
-          <app-input formControlName="originCity"
-                     label="Cidade"
-                     placeholder="Nome da cidade">
-          </app-input>
-          
-          <app-input formControlName="originState"
-                     label="Estado"
-                     [maxLength]="2"
-                     placeholder="UF">
-          </app-input>
-        </div>
-      </div>
-      
       <!-- Precificação -->
-      <div class="border-t border-gray-200 pt-6">
+      <div>
         <h3 class="text-h3 mb-4">Precificação</h3>
         
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

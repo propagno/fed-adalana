@@ -87,7 +87,7 @@ import { BadgeComponent } from '../design-system/badge/badge.component';
             Solicitação de Cancelamento
           </p>
           <p class="text-body-sm text-gray-700 mb-2">
-            Status: {{ getCancellationRequestStatusLabel(order.cancellation_request_status) }}
+            Status: {{ getCancellationRequestStatusLabel(order.cancellation_request_status || '') }}
           </p>
           <p *ngIf="order.cancellation_request_reason" class="text-body-sm text-gray-600 line-clamp-2">
             Motivo: {{ order.cancellation_request_reason }}

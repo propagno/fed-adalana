@@ -1,4 +1,4 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { BreakpointObserver, Breakpoints, BreakpointState } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -11,7 +11,7 @@ export class ResponsiveUtil {
    */
   static isMobile(breakpointObserver: BreakpointObserver): Observable<boolean> {
     return breakpointObserver.observe([Breakpoints.Handset])
-      .pipe(map(result => result.matches));
+      .pipe(map((result: BreakpointState) => result.matches));
   }
 
   /**
@@ -19,7 +19,7 @@ export class ResponsiveUtil {
    */
   static isTablet(breakpointObserver: BreakpointObserver): Observable<boolean> {
     return breakpointObserver.observe([Breakpoints.Tablet])
-      .pipe(map(result => result.matches));
+      .pipe(map((result: BreakpointState) => result.matches));
   }
 
   /**
@@ -27,7 +27,7 @@ export class ResponsiveUtil {
    */
   static isDesktop(breakpointObserver: BreakpointObserver): Observable<boolean> {
     return breakpointObserver.observe([Breakpoints.Web])
-      .pipe(map(result => result.matches));
+      .pipe(map((result: BreakpointState) => result.matches));
   }
 
   /**
@@ -39,7 +39,7 @@ export class ResponsiveUtil {
       Breakpoints.Tablet,
       Breakpoints.Web
     ]).pipe(
-      map(result => {
+      map((result: BreakpointState) => {
         if (result.breakpoints[Breakpoints.Handset]) return 'mobile';
         if (result.breakpoints[Breakpoints.Tablet]) return 'tablet';
         if (result.breakpoints[Breakpoints.Web]) return 'desktop';

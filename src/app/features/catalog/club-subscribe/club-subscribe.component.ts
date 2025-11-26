@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
@@ -8,6 +8,7 @@ import { CatalogService, Product } from '../../../core/services/catalog.service'
 import { AuthService } from '../../../core/services/auth.service';
 import { FormatUtil } from '../../../shared/utils/format.util';
 import { ToastService } from '../../../shared/services/toast.service';
+import { PixQrCodeService, PixQrCodeResponse } from '../../../core/services/pix-qrcode.service';
 import { MarketplaceNavbarComponent } from '../../../shared/components/navbar/marketplace-navbar.component';
 import { CardComponent } from '../../../shared/components/design-system/card/card.component';
 import { ButtonComponent } from '../../../shared/components/design-system/button/button.component';
@@ -501,6 +502,169 @@ interface FAQItem {
             </app-card>
           </div>
 
+          <!-- Step 4: Pagamento PIX -->
+          <div *ngIf="currentStep === 3" class="space-y-6">
+            <!-- Success Card -->
+            <app-card variant="primary" [elevation]="2" padding="lg" customClass="text-center relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32"></div>
+              <div class="relative">
+                <div class="text-6xl mb-4">🎉</div>
+                <h3 class="text-h2 font-display font-bold text-white mb-2">
+                  Assinatura Criada com Sucesso!
+                </h3>
+                <p class="text-body text-white/90">
+                  Agora é só pagar a mensalidade para ativar seus benefícios.
+                </p>
+              </div>
+            </app-card>
+
+            <!-- PIX Payment Card -->
+            <app-card variant="neutral" [elevation]="1" padding="lg">
+              <h3 class="text-h3 font-display font-semibold text-primary mb-4 flex items-center gap-2">
+                <span class="text-2xl">💳</span>
+                Pagamento via PIX
+              </h3>
+              
+              <!-- Loading State -->
+              <div *ngIf="loadingPixQrCode" class="text-center py-8">
+                <app-skeleton-loader type="card"></app-skeleton-loader>
+                <p class="text-body-sm text-gray-600 mt-4">Gerando QR Code PIX...</p>
+              </div>
+              
+              <!-- QR Code Display -->
+              <div *ngIf="!loadingPixQrCode && pixQrCode && !qrCodeExpired" class="space-y-6">
+                <!-- Amount Display -->
+                <div class="text-center p-6 bg-gradient-to-br from-primary-light/10 to-primary/10 rounded-large border-2 border-primary/20">
+                  <p class="text-body-sm text-gray-600 mb-2">Valor a pagar</p>
+                  <p class="text-4xl font-display font-bold text-primary">
+                    {{ formatCurrency(pixQrCode.amount) }}
+                  </p>
+                  <p class="text-body-sm text-gray-500 mt-2">
+                    QR Code válido por: <strong>{{ getTimeUntilExpiration() }}</strong>
+                  </p>
+                </div>
+                
+                <!-- QR Code Image -->
+                <div class="flex justify-center">
+                  <div class="p-4 bg-white rounded-large border-2 border-gray-200 shadow-md">
+                    <img [src]="'data:image/png;base64,' + pixQrCode.qr_code_image_base64" 
+                         alt="QR Code PIX"
+                         class="w-64 h-64">
+                  </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="bg-info/10 border border-info/20 rounded-large p-4">
+                  <p class="text-body-sm text-gray-700 mb-2">
+                    <strong>Como pagar:</strong>
+                  </p>
+                  <ol class="list-decimal list-inside space-y-1 text-body-sm text-gray-600">
+                    <li>Abra o app do seu banco</li>
+                    <li>Escaneie o QR Code acima ou copie o código abaixo</li>
+                    <li>Confirme o pagamento</li>
+                    <li>Seus benefícios serão ativados automaticamente após confirmação</li>
+                  </ol>
+                </div>
+                
+                <!-- Copy Code Section -->
+                <div class="space-y-3">
+                  <label class="block text-body-sm font-medium text-primary mb-2">
+                    Código PIX (Copia e Cola)
+                  </label>
+                  <div class="flex gap-2">
+                    <input 
+                      type="text" 
+                      [value]="pixQrCode.qr_code_string"
+                      readonly
+                      id="pix-code-input"
+                      class="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-large text-body-sm font-mono text-gray-700 focus:outline-none focus:border-primary">
+                    <app-button
+                      [variant]="copiedToClipboard ? 'secondary' : 'primary'"
+                      [label]="copiedToClipboard ? '✓ Copiado!' : '📋 Copiar'"
+                      (clicked)="copyPixCode()">
+                    </app-button>
+                  </div>
+                </div>
+                
+                <!-- Expiration Warning -->
+                <div class="bg-warning/10 border border-warning/20 rounded-large p-3">
+                  <p class="text-body-sm text-gray-700">
+                    <strong>⏰ Atenção:</strong> Este QR Code expira em <strong>{{ getTimeUntilExpiration() }}</strong>. 
+                    Após a expiração, você precisará gerar um novo código.
+                  </p>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                  <app-button
+                    variant="primary"
+                    size="lg"
+                    label="Já paguei, continuar"
+                    [fullWidth]="true"
+                    (clicked)="finishSubscription()">
+                  </app-button>
+                  <app-button
+                    variant="secondary"
+                    size="lg"
+                    label="Pagar depois"
+                    [fullWidth]="true"
+                    (clicked)="finishSubscription()">
+                  </app-button>
+                </div>
+              </div>
+              
+              <!-- Expired State -->
+              <div *ngIf="!loadingPixQrCode && qrCodeExpired" class="text-center py-8 space-y-4">
+                <div class="text-5xl mb-4">⏰</div>
+                <p class="text-h4 font-semibold text-primary mb-2">
+                  QR Code Expirado
+                </p>
+                <p class="text-body text-gray-600 mb-6">
+                  O QR Code PIX expirou. Gere um novo código para continuar o pagamento.
+                </p>
+                <app-button
+                  variant="primary"
+                  size="lg"
+                  label="Gerar Novo QR Code"
+                  (clicked)="regenerateQrCode()">
+                </app-button>
+                <div class="pt-4">
+                  <app-button
+                    variant="secondary"
+                    size="md"
+                    label="Pagar depois"
+                    (clicked)="finishSubscription()">
+                  </app-button>
+                </div>
+              </div>
+              
+              <!-- Error State -->
+              <div *ngIf="!loadingPixQrCode && !pixQrCode && !qrCodeExpired" class="text-center py-8 space-y-4">
+                <div class="text-5xl mb-4">⚠️</div>
+                <p class="text-h4 font-semibold text-primary mb-2">
+                  Não foi possível gerar o QR Code PIX
+                </p>
+                <p class="text-body text-gray-600 mb-6">
+                  Você pode continuar e pagar depois através do painel de gerenciamento da assinatura.
+                </p>
+                <app-button
+                  variant="primary"
+                  size="lg"
+                  label="Tentar Novamente"
+                  (clicked)="regenerateQrCode()">
+                </app-button>
+                <div class="pt-4">
+                  <app-button
+                    variant="secondary"
+                    size="md"
+                    label="Continuar mesmo assim"
+                    (clicked)="finishSubscription()">
+                  </app-button>
+                </div>
+              </div>
+            </app-card>
+          </div>
+
           <!-- Navigation Buttons - Fixed Bottom on Mobile -->
           <div class="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 p-4 md:relative md:border-0 md:p-0 md:mt-8 shadow-lg md:shadow-none z-20">
             <div class="max-w-5xl mx-auto flex gap-3">
@@ -529,6 +693,14 @@ interface FAQItem {
                 [fullWidth]="true"
                 [loading]="submitting"
                 (clicked)="confirmSubscription()">
+              </app-button>
+              <app-button 
+                *ngIf="currentStep === 3"
+                variant="secondary"
+                size="lg"
+                label="Voltar"
+                [fullWidth]="true"
+                (clicked)="previousStep()">
               </app-button>
             </div>
           </div>
@@ -590,7 +762,7 @@ interface FAQItem {
     }
   `]
 })
-export class ClubSubscribeComponent implements OnInit {
+export class ClubSubscribeComponent implements OnInit, OnDestroy {
   club: SubscriptionClub | null = null;
   clubProducts: ClubProduct[] = [];
   loading = false;
@@ -601,11 +773,19 @@ export class ClubSubscribeComponent implements OnInit {
   clubId: string = '';
   accountId: string = '';
   estimatedSavings = 0;
+  
+  // PIX Payment properties
+  pixQrCode: PixQrCodeResponse | null = null;
+  loadingPixQrCode = false;
+  copiedToClipboard = false;
+  qrCodeExpired = false;
+  private countdownInterval: any = null;
 
   steps = [
     { label: 'Benefícios', key: 'benefits' },
     { label: 'Termos', key: 'terms' },
-    { label: 'Confirmar', key: 'confirm' }
+    { label: 'Confirmar', key: 'confirm' },
+    { label: 'Pagamento', key: 'payment' }
   ];
 
   faqs: FAQItem[] = [
@@ -648,7 +828,8 @@ export class ClubSubscribeComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private pixQrCodeService: PixQrCodeService
   ) {}
 
   ngOnInit(): void {
@@ -790,12 +971,17 @@ export class ClubSubscribeComponent implements OnInit {
       requestPayload
     ).subscribe({
       next: (subscription) => {
-        this.toastService.success('Assinatura realizada com sucesso! 🎉');
+        this.toastService.success('Assinatura criada com sucesso! 🎉');
         this.submitting = false;
         
-        this.router.navigate(['/customer/my-club-subscription'], {
-          queryParams: { accountId: this.accountId }
-        });
+        // Avançar para etapa de pagamento primeiro
+        this.currentStep = 3; // Etapa 4 (índice 3)
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Gerar QR Code PIX para pagamento (após mudar de etapa)
+        setTimeout(() => {
+          this.generatePixQrCode();
+        }, 100);
       },
       error: (err) => {
         console.error('Error subscribing to club', err);
@@ -813,6 +999,179 @@ export class ClubSubscribeComponent implements OnInit {
     });
   }
 
+  /**
+   * Gera QR Code PIX para pagamento da mensalidade
+   */
+  generatePixQrCode(): void {
+    if (!this.club || !this.accountId) {
+      console.warn('Cannot generate PIX QR code: club or accountId is missing', { club: this.club, accountId: this.accountId });
+      return;
+    }
+    
+    // Validar monthlyFee antes de enviar
+    if (!this.club.monthlyFee || this.club.monthlyFee <= 0) {
+      console.error('Invalid monthlyFee:', this.club.monthlyFee);
+      this.toastService.error('Erro: Mensalidade do clube não está configurada corretamente.');
+      this.loadingPixQrCode = false;
+      return;
+    }
+    
+    console.log('Generating PIX QR code', { 
+      accountId: this.accountId, 
+      monthlyFee: this.club.monthlyFee,
+      clubName: this.club.name 
+    });
+    
+    this.loadingPixQrCode = true;
+    this.qrCodeExpired = false;
+    
+    const request = {
+      amount: Number(this.club.monthlyFee), // Garantir que é um número
+      description: `Mensalidade do ${this.club.name}`
+    };
+    
+    console.log('PIX QR Code request:', request);
+    
+    // Validação adicional antes de enviar
+    if (!request.amount || request.amount <= 0 || isNaN(request.amount)) {
+      console.error('Invalid amount in request:', request);
+      this.toastService.error('Erro: Valor inválido para geração do QR Code PIX.');
+      this.loadingPixQrCode = false;
+      return;
+    }
+    
+    this.pixQrCodeService.generateClubSubscriptionQrCode(this.accountId, request).subscribe({
+      next: (response) => {
+        console.log('PIX QR Code generated successfully', response);
+        this.pixQrCode = response;
+        this.loadingPixQrCode = false;
+        
+        // Garantir que estamos na etapa de pagamento
+        if (this.currentStep !== 3) {
+          this.currentStep = 3;
+        }
+        
+        // Iniciar countdown em tempo real
+        this.startCountdown();
+      },
+      error: (err) => {
+        console.error('Error generating PIX QR code', err);
+        console.error('Error details:', {
+          status: err.status,
+          message: err.message,
+          error: err.error
+        });
+        
+        if (err.status === 400 || err.message?.includes('Chave PIX não configurada') || err.error?.message?.includes('Chave PIX')) {
+          this.toastService.warning('Chave PIX não configurada pela empresa. Você pode pagar depois.');
+        } else {
+          this.toastService.error('Erro ao gerar QR Code PIX. Você pode pagar depois.');
+        }
+        
+        this.loadingPixQrCode = false;
+        // Mesmo com erro, permite continuar
+      }
+    });
+  }
+
+  /**
+   * Inicia countdown em tempo real (atualiza a cada segundo)
+   */
+  startCountdown(): void {
+    // Limpar intervalo anterior se existir
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+    
+    // Atualizar countdown a cada segundo
+    this.countdownInterval = setInterval(() => {
+      if (!this.pixQrCode?.expires_at) {
+        clearInterval(this.countdownInterval);
+        return;
+      }
+      
+      const expirationDate = new Date(this.pixQrCode.expires_at);
+      const now = new Date();
+      
+      if (now >= expirationDate) {
+        this.qrCodeExpired = true;
+        this.toastService.warning('QR Code PIX expirado. Gere um novo código.');
+        clearInterval(this.countdownInterval);
+        this.countdownInterval = null;
+      }
+      
+      // Forçar detecção de mudanças para atualizar o template
+      // (Angular detecta mudanças automaticamente, mas garantimos)
+    }, 1000); // Atualizar a cada segundo
+  }
+  
+  /**
+   * Para o countdown
+   */
+  stopCountdown(): void {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  }
+
+  /**
+   * Copia código PIX para área de transferência
+   */
+  copyPixCode(): void {
+    if (!this.pixQrCode?.qr_code_string) return;
+    
+    navigator.clipboard.writeText(this.pixQrCode.qr_code_string).then(() => {
+      this.copiedToClipboard = true;
+      this.toastService.success('Código PIX copiado!');
+      
+      setTimeout(() => {
+        this.copiedToClipboard = false;
+      }, 3000);
+    }).catch(err => {
+      console.error('Error copying to clipboard', err);
+      this.toastService.error('Erro ao copiar código. Tente selecionar manualmente.');
+    });
+  }
+
+  /**
+   * Gera novo QR Code (quando expira)
+   */
+  regenerateQrCode(): void {
+    this.pixQrCode = null;
+    this.generatePixQrCode();
+  }
+
+  /**
+   * Finaliza fluxo e redireciona para página de gerenciamento
+   */
+  finishSubscription(): void {
+    // Parar countdown antes de navegar
+    this.stopCountdown();
+    
+    this.router.navigate(['/customer/my-club-subscription'], {
+      queryParams: { accountId: this.accountId }
+    });
+  }
+
+  /**
+   * Formata tempo restante até expiração
+   */
+  getTimeUntilExpiration(): string {
+    if (!this.pixQrCode?.expires_at) return '';
+    
+    const expirationDate = new Date(this.pixQrCode.expires_at);
+    const now = new Date();
+    const diff = expirationDate.getTime() - now.getTime();
+    
+    if (diff <= 0) return 'Expirado';
+    
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
   formatCurrency(value: number): string {
     return FormatUtil.formatCurrencyFromReais(value);
   }
@@ -821,5 +1180,9 @@ export class ClubSubscribeComponent implements OnInit {
     this.router.navigate(['/catalog/clubs'], {
       queryParams: { accountId: this.accountId }
     });
+  }
+  
+  ngOnDestroy(): void {
+    this.stopCountdown();
   }
 }

@@ -64,8 +64,8 @@ import { MapPinIconComponent } from '../icons/map-pin-icon.component';
             </h3>
             <ul class="space-y-2">
               <li class="text-body text-gray-300">
-                <a href="mailto:contato@adalana.com" class="hover:text-primary-light transition-colors">
-                  contato@adalana.com
+                <a href="mailto:contato&#64;adalana.com" class="hover:text-primary-light transition-colors">
+                  contato&#64;adalana.com
                 </a>
               </li>
               <li class="text-body text-gray-300">

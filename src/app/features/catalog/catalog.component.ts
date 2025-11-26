@@ -29,180 +29,8 @@ import { ProductCardComponent } from '../../shared/components/product/product-ca
   selector: 'app-catalog',
   standalone: true,
   imports: [CommonModule, FormsModule, CartIndicatorComponent, SkeletonLoaderComponent, EmptyStateComponent, LazyImageDirective, TrackClickDirective, CatalogSearchComponent, CatalogFiltersComponent, ButtonComponent, CardComponent, BadgeComponent, MapPinIconComponent, MarketplaceNavbarComponent, CompanyCardComponent, ProductCardComponent],
-  template: `
-    <div class="min-h-screen bg-background">
-      <!-- Marketplace Navbar -->
-      <app-marketplace-navbar></app-marketplace-navbar>
-
-              <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-6 lg:py-8" tabindex="-1" role="main">
-                <!-- Hero Section with Search -->
-                <div class="mb-6 md:mb-8 lg:mb-12 text-center animate-fade-in">
-                  <div class="mb-4 md:mb-6">
-                    <h1 class="text-2xl md:text-h1 lg:text-display font-display font-bold text-gray-900 mb-2 md:mb-4">Encontre os Melhores Produtos</h1>
-                    <p class="text-body md:text-body-lg text-gray-600 mb-4 md:mb-6 lg:mb-8 max-w-2xl mx-auto px-2">Explore nosso catálogo de empresas parceiras e descubra produtos incríveis para você</p>
-                  </div>
-          
-          <!-- Search Bar - Full width on mobile -->
-          <div class="w-full md:max-w-3xl mx-auto mb-4 md:mb-6 lg:mb-8">
-            <app-catalog-search 
-              (searchChange)="onSearchQueryChange($event)"
-              (searchSubmit)="onSearchSubmit($event)">
-            </app-catalog-search>
-          </div>
-          
-          <!-- Mobile Filter Button -->
-          <div class="md:hidden mb-4">
-            <app-button 
-              variant="outline"
-              size="md"
-              [label]="'Filtros' + (hasActiveFilters() ? ' (' + getActiveFiltersCount() + ')' : '')"
-              (clicked)="showFiltersDrawer = true"
-              [fullWidth]="true">
-            </app-button>
-          </div>
-        </div>
-
-        <!-- Results Layout - Mobile-first -->
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-          <!-- Filters Sidebar (Desktop) -->
-          <aside class="hidden lg:block" aria-label="Filtros de busca">
-            <app-catalog-filters
-              [isMobile]="false"
-              [showDrawer]="false"
-              (filtersChange)="onFiltersChange($event)">
-            </app-catalog-filters>
-          </aside>
-
-          <!-- Results -->
-          <div class="lg:col-span-3">
-
-            <!-- Search Results Summary -->
-            <app-card *ngIf="searchResults" variant="highlighted" [elevation]="0" padding="md" customClass="mb-6">
-              <div class="flex items-center gap-2">
-                <app-map-pin-icon size="sm" variant="filled" color="text-primary-light"></app-map-pin-icon>
-                <p class="text-body text-primary">
-                  <span class="font-semibold">{{ searchResults.total_results }}</span> resultado(s) encontrado(s)
-                  <span *ngIf="searchResults.total_companies > 0"> - {{ searchResults.total_companies }} empresa(s)</span>
-                  <span *ngIf="searchResults.total_products > 0"> - {{ searchResults.total_products }} produto(s)</span>
-                </p>
-              </div>
-            </app-card>
-
-            <!-- Companies Section -->
-            <section class="mb-6 md:mb-8" *ngIf="(!searchResults && filteredCompanies && filteredCompanies.length > 0) || (searchResults && searchResults.companies.length > 0)">
-              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4 md:mb-6">
-                <div>
-                  <h2 class="text-xl md:text-h1 font-display font-semibold text-gray-900">Empresas</h2>
-                  <p class="text-body-sm md:text-body text-gray-600 mt-1">Explore nossos parceiros e seus produtos</p>
-                </div>
-                <app-badge 
-                  variant="info" 
-                  size="md"
-                  [label]="((searchResults?.companies || filteredCompanies)?.length || 0) + ' ' + (((searchResults?.companies || filteredCompanies)?.length || 0) === 1 ? 'empresa' : 'empresas')">
-                </app-badge>
-              </div>
-
-              <div *ngIf="loadingCompanies || loadingSearch" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <app-skeleton-loader *ngFor="let i of [1,2,3,4,5,6]" type="product-card"></app-skeleton-loader>
-              </div>
-
-              <app-empty-state *ngIf="!loadingCompanies && !loadingSearch && (!searchResults || (searchResults.companies.length === 0 && searchResults.products.length === 0)) && (!filteredCompanies || filteredCompanies.length === 0)"
-                               title="Nenhum Resultado Encontrado"
-                               message="Não encontramos empresas ou produtos que correspondam à sua busca. Tente outros termos ou ajuste os filtros."
-                               [actionLabel]="'Limpar Filtros'"
-                               [actionHandler]="clearAllFilters.bind(this)">
-              </app-empty-state>
-
-              <div *ngIf="!loadingCompanies && !loadingSearch && (searchResults?.companies || filteredCompanies) && (searchResults?.companies || filteredCompanies)!.length > 0" 
-                   class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <app-company-card 
-                  *ngFor="let company of (searchResults?.companies || filteredCompanies)"
-                  [company]="company"
-                  (viewProducts)="selectCompany(company)"
-                  [appTrackClick]="'Company Card Click'"
-                  [trackCategory]="'Catalog'"
-                  [trackLabel]="company.company_name">
-                </app-company-card>
-              </div>
-              
-              <!-- Pagination - Mobile optimized -->
-              <div *ngIf="totalPages > 1 && !loadingCompanies && !loadingSearch" 
-                   class="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 pt-4 md:pt-6">
-                <div class="text-body-sm text-gray-700 text-center sm:text-left">
-                  Mostrando <span class="font-medium">{{ ((currentPage - 1) * pageSize) + 1 }}</span>
-                  até <span class="font-medium">{{ Math.min(currentPage * pageSize, totalResults) }}</span>
-                  de <span class="font-medium">{{ totalResults }}</span> empresas
-                </div>
-                <div class="flex items-center gap-2 w-full sm:w-auto justify-center">
-                  <app-button
-                    variant="outline"
-                    size="sm"
-                    label="Anterior"
-                    [disabled]="currentPage === 1"
-                    (clicked)="previousPage()">
-                  </app-button>
-                  <div class="flex items-center gap-1 overflow-x-auto">
-                    <button
-                      *ngFor="let page of getPageNumbers()"
-                      (click)="goToPage(page)"
-                      [class.bg-primary]="page === currentPage"
-                      [class.text-white]="page === currentPage"
-                      [class.bg-white]="page !== currentPage"
-                      [class.text-gray-700]="page !== currentPage"
-                      class="min-w-[44px] min-h-[44px] px-3 py-2 text-sm font-medium border border-gray-300 rounded-medium active:bg-gray-100 active:scale-95 focus:ring-2 focus:ring-primary focus:ring-offset-1 lg:hover:bg-gray-50 transition-all">
-                      {{ page }}
-                    </button>
-                  </div>
-                  <app-button
-                    variant="outline"
-                    size="sm"
-                    label="Próxima"
-                    [disabled]="currentPage === totalPages"
-                    (clicked)="nextPage()">
-                  </app-button>
-                </div>
-              </div>
-            </section>
-
-                    <!-- Products Section -->
-                    <section class="mb-6 md:mb-12" *ngIf="searchResults && searchResults.products.length > 0">
-                      <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4 md:mb-6">
-                        <div>
-                          <h2 class="text-xl md:text-h1 font-display font-semibold text-gray-900">Produtos</h2>
-                          <p class="text-body-sm md:text-body text-gray-600 mt-1">Produtos encontrados na busca</p>
-                        </div>
-                <app-badge 
-                  variant="secondary" 
-                  size="md"
-                  [label]="searchResults.products.length + ' ' + (searchResults.products.length === 1 ? 'produto' : 'produtos')">
-                </app-badge>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                <app-product-card 
-                  *ngFor="let product of searchResults.products"
-                  [product]="convertProductToCardData(product)"
-                  [accountId]="getCurrentAccountId() || undefined"
-                  (addToCart)="onProductAddToCart($event)"
-                  (viewDetails)="goToProductDetails($event)">
-                </app-product-card>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <!-- Mobile Filters Drawer -->
-        <app-catalog-filters
-          [isMobile]="true"
-          [showDrawer]="showFiltersDrawer"
-          (filtersChange)="onFiltersChange($event)"
-          (drawerClose)="showFiltersDrawer = false">
-        </app-catalog-filters>
-
-      </main>
-    </div>
-  `,
-  styles: []
+  templateUrl: './catalog.component.html',
+  styleUrls: ['./catalog.component.css']
 })
 export class CatalogComponent implements OnInit, OnDestroy {
   companies: Company[] | null = null;
@@ -215,6 +43,15 @@ export class CatalogComponent implements OnInit, OnDestroy {
   searchTerm = '';
   showFiltersDrawer = false;
   currentFilters: SearchFilters = {};
+  
+  // Quick Categories for Hero Section
+  quickCategories = [
+    { id: 'restaurant', label: 'Restaurantes', icon: '🍔' },
+    { id: 'market', label: 'Mercados', icon: '🛒' },
+    { id: 'pharmacy', label: 'Farmácias', icon: '💊' },
+    { id: 'drinks', label: 'Bebidas', icon: '🍷' },
+    { id: 'pet', label: 'Pet Shop', icon: '🐾' }
+  ];
   
   // Pagination
   currentPage = 1;
@@ -263,6 +100,15 @@ export class CatalogComponent implements OnInit, OnDestroy {
       this.currentFilters.query = term;
       this.performSearch();
     });
+  }
+
+  toggleCategory(categoryId: string): void {
+    if (this.currentFilters.category === categoryId) {
+      delete this.currentFilters.category;
+    } else {
+      this.currentFilters.category = categoryId;
+    }
+    this.onFiltersChange(this.currentFilters);
   }
 
   ngOnDestroy(): void {

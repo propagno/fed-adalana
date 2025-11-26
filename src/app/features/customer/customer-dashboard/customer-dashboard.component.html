@@ -1,88 +1,136 @@
-<div class="min-h-screen bg-background">
-  <app-marketplace-navbar></app-marketplace-navbar>
+<div class="min-h-screen bg-background pb-12">
+  <app-marketplace-navbar class="fixed top-0 w-full z-navbar"></app-marketplace-navbar>
   
-  <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <app-page-header
-      title="Meu Portal"
-      [description]="'Bem-vindo, ' + getUserName() + '!'"
-      [showActions]="false">
-    </app-page-header>
+  <!-- Hero Section -->
+  <div class="relative bg-gradient-hero pt-24 pb-12 md:pt-32 md:pb-20 overflow-hidden">
+    <!-- Abstract Background Shapes -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+      <div class="absolute top-[-10%] right-[-5%] w-[30%] h-[30%] rounded-full bg-white/5 blur-[80px] animate-float"></div>
+      <div class="absolute bottom-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[100px] animate-pulse-slow"></div>
+    </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <app-card variant="interactive" [elevation]="1" padding="lg" customClass="border-l-4 border-primary-light" (click)="router.navigate(['/customer/subscriptions'])">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-body-sm font-medium text-gray-600 mb-1">Assinaturas Ativas</p>
-            <p class="text-h1 font-bold text-primary">{{ activeSubscriptionsCount }}</p>
+    <div class="relative container mx-auto px-4 sm:px-6 lg:px-8 z-10">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="animate-slide-up">
+          <h1 class="text-3xl md:text-4xl font-display font-bold text-white mb-2">
+            Olá, {{ getUserName() }}! 👋
+          </h1>
+          <p class="text-lg text-white/80 max-w-xl">
+            Bem-vindo ao seu portal. Acompanhe suas assinaturas e pedidos em um só lugar.
+          </p>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="flex gap-4 animate-slide-up" style="animation-delay: 100ms">
+          <div class="glass p-4 rounded-2xl flex items-center gap-3 min-w-[160px]">
+            <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <div>
+              <p class="text-xs text-white/60 font-medium uppercase tracking-wider">Assinaturas</p>
+              <p class="text-xl font-bold text-white">{{ activeSubscriptionsCount }} Ativas</p>
+            </div>
           </div>
-          <div class="w-12 h-12 bg-primary-light/10 rounded-full flex items-center justify-center">
-            <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          
+          <div class="glass p-4 rounded-2xl flex items-center gap-3 min-w-[160px]">
+            <div class="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+            </div>
+            <div>
+              <p class="text-xs text-white/60 font-medium uppercase tracking-wider">Pedidos</p>
+              <p class="text-xl font-bold text-white">{{ pendingOrdersCount }} Pendentes</p>
+            </div>
           </div>
         </div>
-        <div class="text-body-sm text-primary-light mt-2 font-medium">
-          Ver todas →
+      </div>
+    </div>
+  </div>
+
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+    
+    <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-slide-up" style="animation-delay: 200ms">
+      <!-- Catalog Action -->
+      <app-card 
+        variant="interactive" 
+        [elevation]="1" 
+        padding="lg" 
+        (click)="router.navigate(['/catalog'])"
+        class="group cursor-pointer h-full">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+          </div>
         </div>
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-1 group-hover:text-primary transition-colors">Explorar Catálogo</h3>
+        <p class="text-gray-500 text-sm">Descubra novos produtos e empresas parceiras.</p>
       </app-card>
 
-      <app-card variant="interactive" [elevation]="1" padding="lg" customClass="border-l-4 border-success" (click)="router.navigate(['/customer/orders'])">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-body-sm font-medium text-gray-600 mb-1">Pedidos Pendentes</p>
-            <p class="text-h1 font-bold text-primary">{{ pendingOrdersCount }}</p>
+      <!-- Subscriptions Action -->
+      <app-card 
+        variant="interactive" 
+        [elevation]="1" 
+        padding="lg" 
+        (click)="router.navigate(['/customer/subscriptions'])"
+        class="group cursor-pointer h-full">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-accent-dark group-hover:scale-110 transition-transform duration-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           </div>
-          <div class="w-12 h-12 bg-success/10 rounded-full flex items-center justify-center">
-            <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-            </svg>
+          <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-accent group-hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
           </div>
         </div>
-        <div class="text-body-sm text-success mt-2 font-medium">
-          Ver pedidos →
-        </div>
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-1 group-hover:text-accent-dark transition-colors">Minhas Assinaturas</h3>
+        <p class="text-gray-500 text-sm">Gerencie suas entregas recorrentes.</p>
       </app-card>
 
-      <app-card variant="default" [elevation]="1" padding="lg" customClass="border-l-4 border-secondary">
-        <div class="flex items-center justify-between">
-          <div class="flex-1">
-            <p class="text-body-sm font-medium text-gray-600 mb-1 flex items-center gap-2">
-              <app-map-pin-icon size="sm" variant="filled" color="text-secondary"></app-map-pin-icon>
-              Próxima Entrega
-            </p>
-            <p class="text-h3 font-semibold text-primary">
-              {{ nextDeliveryDate ? formatDate(nextDeliveryDate) : 'Nenhuma' }}
-            </p>
-            <p *ngIf="nextDeliveryProduct" class="text-body-sm text-gray-500 mt-1 truncate">{{ nextDeliveryProduct }}</p>
+      <!-- Orders Action -->
+      <app-card 
+        variant="interactive" 
+        [elevation]="1" 
+        padding="lg" 
+        (click)="router.navigate(['/customer/orders'])"
+        class="group cursor-pointer h-full">
+        <div class="flex items-start justify-between mb-4">
+          <div class="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform duration-300">
+            <app-map-pin-icon size="md" variant="filled" color="text-secondary"></app-map-pin-icon>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
           </div>
         </div>
+        <h3 class="text-xl font-display font-bold text-gray-900 mb-1 group-hover:text-secondary transition-colors">Meus Pedidos</h3>
+        <p class="text-gray-500 text-sm">Acompanhe o status das suas entregas.</p>
       </app-card>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- My Subscriptions Preview -->
-      <app-card [elevation]="1" padding="lg">
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-up" style="animation-delay: 300ms">
+      
+      <!-- Recent Subscriptions -->
+      <section>
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-h2 font-display text-primary">Minhas Assinaturas</h2>
-          <a routerLink="/customer/subscriptions" class="text-body-sm text-primary-light hover:text-primary-light-600 font-medium">
-            Ver todas →
+          <h2 class="text-2xl font-display font-bold text-gray-900">Assinaturas Recentes</h2>
+          <a routerLink="/customer/subscriptions" class="text-sm font-medium text-primary hover:text-primary-light transition-colors">
+            Ver todas
           </a>
         </div>
 
-        <div *ngIf="loadingSubscriptions" class="text-center py-8">
-          <app-skeleton-loader type="card"></app-skeleton-loader>
+        <div *ngIf="loadingSubscriptions" class="space-y-4">
+          <app-skeleton-loader *ngFor="let i of [1,2]" type="card"></app-skeleton-loader>
         </div>
 
-        <div *ngIf="!loadingSubscriptions && activeSubscriptions.length === 0" class="text-center py-8">
-          <app-map-pin-icon size="xl" variant="outline" color="text-gray-300" class="mx-auto mb-4"></app-map-pin-icon>
-          <p class="text-body text-gray-500 mb-4">Nenhuma assinatura ativa</p>
-          <app-button 
-            variant="primary"
-            size="md"
-            label="Explorar Produtos"
-            (clicked)="router.navigate(['/catalog'])">
-          </app-button>
+        <div *ngIf="!loadingSubscriptions && activeSubscriptions.length === 0" class="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm">
+          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Nenhuma assinatura ativa</h3>
+          <p class="text-gray-500 mb-6">Comece a assinar seus produtos favoritos e economize.</p>
+          <app-button variant="primary" label="Explorar Catálogo" (clicked)="router.navigate(['/catalog'])"></app-button>
         </div>
 
         <div *ngIf="!loadingSubscriptions && activeSubscriptions.length > 0" class="space-y-4">
@@ -90,46 +138,50 @@
                     variant="interactive"
                     [elevation]="0"
                     padding="md"
-                    customClass="border border-gray-200 hover:border-primary-light transition-all">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <h3 class="text-h4 text-primary mb-2">{{ sub.product_name || 'Produto' }}</h3>
-                <div class="flex items-center gap-4 text-body-sm text-gray-600 mb-2">
-                  <span class="flex items-center gap-2">
-                    <app-map-pin-icon size="sm" variant="filled" color="text-primary-light"></app-map-pin-icon>
-                    Próxima: {{ formatDate(sub.next_delivery) }}
+                    customClass="border border-gray-100 hover:border-primary/20 hover:shadow-md transition-all group">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+                <span class="text-xl">📦</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-base font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+                  {{ sub.product_name || 'Produto' }}
+                </h3>
+                <div class="flex items-center gap-3 text-sm text-gray-500 mt-1">
+                  <span class="flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                    {{ formatDate(sub.next_delivery) }}
                   </span>
+                  <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                   <span>Qtd: {{ sub.quantity }}</span>
                 </div>
-                <app-badge variant="success" size="sm" label="Ativa"></app-badge>
               </div>
+              <app-badge variant="success" size="sm" label="Ativa" class="!bg-success/10 !text-success"></app-badge>
             </div>
           </app-card>
         </div>
-      </app-card>
+      </section>
 
-      <!-- Recent Orders Preview -->
-      <app-card [elevation]="1" padding="lg">
+      <!-- Recent Orders -->
+      <section>
         <div class="flex items-center justify-between mb-6">
-          <h2 class="text-h2 font-display text-primary">Pedidos Recentes</h2>
-          <a routerLink="/customer/orders" class="text-body-sm text-primary-light hover:text-primary-light-600 font-medium">
-            Ver todos →
+          <h2 class="text-2xl font-display font-bold text-gray-900">Últimos Pedidos</h2>
+          <a routerLink="/customer/orders" class="text-sm font-medium text-primary hover:text-primary-light transition-colors">
+            Ver todos
           </a>
         </div>
 
-        <div *ngIf="loadingOrders" class="text-center py-8">
-          <app-skeleton-loader type="card"></app-skeleton-loader>
+        <div *ngIf="loadingOrders" class="space-y-4">
+          <app-skeleton-loader *ngFor="let i of [1,2]" type="card"></app-skeleton-loader>
         </div>
 
-        <div *ngIf="!loadingOrders && recentOrders.length === 0" class="text-center py-8">
-          <app-map-pin-icon size="xl" variant="outline" color="text-gray-300" class="mx-auto mb-4"></app-map-pin-icon>
-          <p class="text-body text-gray-500 mb-4">Nenhum pedido ainda</p>
-          <app-button 
-            variant="primary"
-            size="md"
-            label="Fazer Pedido"
-            (clicked)="router.navigate(['/catalog'])">
-          </app-button>
+        <div *ngIf="!loadingOrders && recentOrders.length === 0" class="bg-white rounded-2xl p-8 text-center border border-gray-100 shadow-sm">
+          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Nenhum pedido recente</h3>
+          <p class="text-gray-500 mb-6">Seus pedidos aparecerão aqui.</p>
+          <app-button variant="outline" label="Fazer Pedido" (clicked)="router.navigate(['/catalog'])"></app-button>
         </div>
 
         <div *ngIf="!loadingOrders && recentOrders.length > 0" class="space-y-4">
@@ -137,67 +189,29 @@
                     variant="interactive"
                     [elevation]="0"
                     padding="md"
-                    customClass="border border-gray-200 hover:border-primary-light transition-all">
-            <div class="flex items-start justify-between">
-              <div class="flex-1">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-h4 text-primary font-semibold">{{ formatDate(order.delivery_date) }}</span>
+                    customClass="border border-gray-100 hover:border-secondary/20 hover:shadow-md transition-all group">
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center flex-shrink-0">
+                <span class="text-xl">🛍️</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mb-1">
+                  <h3 class="text-base font-semibold text-gray-900 truncate group-hover:text-secondary transition-colors">
+                    {{ order.product_name || 'Pedido #' + order.id.slice(0, 8) }}
+                  </h3>
+                  <span class="text-sm font-bold text-gray-900">{{ formatCurrency(order.amount || 0) }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-500">{{ formatDate(order.delivery_date) }}</span>
                   <app-badge [variant]="getStatusBadgeVariant(order.status)" size="sm" [label]="getStatusLabel(order.status)"></app-badge>
                 </div>
-                <p class="text-body-sm text-gray-600 mb-1">{{ order.product_name || 'Pedido' }}</p>
-                <p class="text-h4 font-semibold text-primary-light">{{ formatCurrency(order.amount || 0) }}</p>
               </div>
             </div>
           </app-card>
         </div>
-      </app-card>
+      </section>
+
     </div>
-
-    <!-- Quick Actions -->
-    <app-card [elevation]="1" padding="lg" customClass="mt-8">
-      <h2 class="text-h2 font-display text-primary mb-6">Ações Rápidas</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-primary-light/30 hover:border-primary-light transition-all cursor-pointer" (click)="router.navigate(['/catalog'])">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-primary-light/10 rounded-large flex items-center justify-center">
-              <svg class="w-6 h-6 text-primary-light" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-h4 text-primary font-semibold">Explorar Catálogo</p>
-              <p class="text-body-sm text-gray-500">Ver produtos disponíveis</p>
-            </div>
-          </div>
-        </app-card>
-
-        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-success/30 hover:border-success transition-all cursor-pointer" (click)="router.navigate(['/customer/subscriptions'])">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-success/10 rounded-large flex items-center justify-center">
-              <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
-              <p class="text-h4 text-primary font-semibold">Minhas Assinaturas</p>
-              <p class="text-body-sm text-gray-500">Gerenciar assinaturas</p>
-            </div>
-          </div>
-        </app-card>
-
-        <app-card variant="interactive" [elevation]="0" padding="md" customClass="border-2 border-secondary/30 hover:border-secondary transition-all cursor-pointer" (click)="router.navigate(['/customer/orders'])">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 bg-secondary/10 rounded-large flex items-center justify-center">
-              <app-map-pin-icon size="md" variant="filled" color="text-secondary"></app-map-pin-icon>
-            </div>
-            <div>
-              <p class="text-h4 text-primary font-semibold">Meus Pedidos</p>
-              <p class="text-body-sm text-gray-500">Histórico de pedidos</p>
-            </div>
-          </div>
-        </app-card>
-      </div>
-    </app-card>
   </div>
 </div>
 

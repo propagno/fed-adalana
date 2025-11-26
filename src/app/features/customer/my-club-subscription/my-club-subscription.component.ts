@@ -251,6 +251,15 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
               (clicked)="resumeSubscription()">
             </app-button>
             <app-button 
+              *ngIf="subscription.status === 'cancelled'"
+              variant="primary"
+              size="lg"
+              label="Reativar Assinatura"
+              [fullWidth]="true"
+              [loading]="reactivating"
+              (clicked)="reactivateSubscription()">
+            </app-button>
+            <app-button 
               *ngIf="subscription.status !== 'cancelled'"
               variant="danger"
               size="lg"
@@ -345,6 +354,7 @@ export class MyClubSubscriptionComponent implements OnInit {
   loading = false;
   loadingPaymentHistory = false;
   resuming = false;
+  reactivating = false;
   showPauseModal = false;
   showCancelModal = false;
   pauseReason = '';
@@ -451,6 +461,29 @@ export class MyClubSubscriptionComponent implements OnInit {
       error: (err) => {
         this.toastService.error(err.error?.message || 'Erro ao retomar assinatura');
         this.resuming = false;
+      }
+    });
+  }
+
+  reactivateSubscription(): void {
+    if (!this.subscription || !this.subscription.club?.id) return;
+
+    this.reactivating = true;
+    // Reativar assinatura cancelada usando o mesmo endpoint de subscribe
+    // O backend detecta assinatura cancelada e reativa automaticamente
+    this.customerClubSubscriptionService.subscribeToClub(
+      this.accountId,
+      this.subscription.club.id,
+      { acceptedTerms: true, autoRenew: true }
+    ).subscribe({
+      next: () => {
+        this.toastService.success('Assinatura reativada com sucesso! 🎉');
+        this.reactivating = false;
+        this.loadSubscription();
+      },
+      error: (err) => {
+        this.toastService.error(err.error?.message || 'Erro ao reativar assinatura');
+        this.reactivating = false;
       }
     });
   }

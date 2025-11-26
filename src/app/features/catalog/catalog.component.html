@@ -1,0 +1,206 @@
+<div class="min-h-screen bg-background pb-12">
+  <!-- Marketplace Navbar -->
+  <app-marketplace-navbar class="fixed top-0 w-full z-navbar"></app-marketplace-navbar>
+
+  <!-- Hero Section with Premium Gradient -->
+  <div class="relative bg-gradient-hero pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden">
+    <!-- Abstract Background Shapes -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+      <div class="absolute top-[-10%] left-[-5%] w-[30%] h-[30%] rounded-full bg-white/5 blur-[80px] animate-float"></div>
+      <div class="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-secondary/10 blur-[100px] animate-pulse-slow"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+      <h1 class="text-3xl md:text-display font-display font-bold text-white mb-4 animate-fade-in tracking-tight">
+        Encontre o que você precisa
+      </h1>
+      <p class="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto animate-slide-up" style="animation-delay: 100ms">
+        Explore as melhores empresas e produtos da sua região com entrega rápida e segura.
+      </p>
+
+      <!-- Floating Search Bar with Glassmorphism -->
+      <div class="w-full max-w-3xl mx-auto animate-slide-up" style="animation-delay: 200ms">
+        <div class="glass p-2 rounded-2xl shadow-brand-lg transform transition-all duration-300 hover:scale-[1.01]">
+          <app-catalog-search 
+            (searchChange)="onSearchQueryChange($event)"
+            (searchSubmit)="onSearchSubmit($event)">
+          </app-catalog-search>
+        </div>
+      </div>
+
+      <!-- Quick Categories (Horizontal Scroll) -->
+      <div class="mt-8 flex justify-center gap-3 overflow-x-auto pb-2 scrollbar-hide animate-slide-up" style="animation-delay: 300ms">
+        <button *ngFor="let cat of quickCategories"
+                (click)="toggleCategory(cat.id)"
+                [ngClass]="{
+                  'bg-white text-primary': currentFilters.category === cat.id,
+                  'bg-white/10 text-white': currentFilters.category !== cat.id
+                }"
+                class="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md border border-white/10 transition-all duration-200 hover:bg-white/20 active:scale-95 whitespace-nowrap">
+          <span class="text-xl">{{ cat.icon }}</span>
+          <span class="font-medium">{{ cat.label }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20" tabindex="-1" role="main">
+    
+    <!-- Mobile Filter Button -->
+    <div class="md:hidden mb-6">
+      <app-button 
+        variant="primary"
+        size="md"
+        [label]="'Filtros' + (hasActiveFilters() ? ' (' + getActiveFiltersCount() + ')' : '')"
+        (clicked)="showFiltersDrawer = true"
+        [fullWidth]="true"
+        customClass="shadow-lg">
+      </app-button>
+    </div>
+
+    <!-- Results Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      
+      <!-- Sticky Filters Sidebar (Desktop) -->
+      <aside class="hidden lg:block" aria-label="Filtros de busca">
+        <div class="sticky top-24 transition-all duration-300">
+          <app-catalog-filters
+            [isMobile]="false"
+            [showDrawer]="false"
+            (filtersChange)="onFiltersChange($event)">
+          </app-catalog-filters>
+        </div>
+      </aside>
+
+      <!-- Results Area -->
+      <div class="lg:col-span-3 space-y-8">
+
+        <!-- Search Results Summary -->
+        <div *ngIf="searchResults" class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between animate-fade-in">
+          <div class="flex items-center gap-2">
+            <app-map-pin-icon size="sm" variant="filled" color="text-primary"></app-map-pin-icon>
+            <p class="text-body text-gray-700">
+              Encontramos <span class="font-bold text-primary">{{ searchResults.total_results }}</span> resultados
+            </p>
+          </div>
+          <button *ngIf="hasActiveFilters()" (click)="clearAllFilters()" class="text-sm text-red-500 hover:text-red-700 font-medium transition-colors">
+            Limpar filtros
+          </button>
+        </div>
+
+        <!-- Companies Section -->
+        <section *ngIf="(!searchResults && filteredCompanies && filteredCompanies.length > 0) || (searchResults && searchResults.companies.length > 0)">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+              <h2 class="text-3xl font-display font-bold !text-primary">
+                Empresas Parceiras
+              </h2>
+              <span class="text-sm font-medium text-white bg-primary px-2.5 py-0.5 rounded-full shadow-sm" style="color: #ffffff !important;">
+                {{ (searchResults?.companies || filteredCompanies)?.length || 0 }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div *ngIf="loadingCompanies || loadingSearch" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <app-skeleton-loader *ngFor="let i of [1,2,3,4,5,6]" type="product-card"></app-skeleton-loader>
+          </div>
+
+          <!-- Empty State -->
+          <app-empty-state *ngIf="!loadingCompanies && !loadingSearch && (!searchResults || (searchResults.companies.length === 0 && searchResults.products.length === 0)) && (!filteredCompanies || filteredCompanies.length === 0)"
+                           title="Nenhum Resultado Encontrado"
+                           message="Não encontramos o que você procura. Tente ajustar os filtros ou buscar por outro termo."
+                           [actionLabel]="'Limpar Filtros'"
+                           [actionHandler]="clearAllFilters.bind(this)">
+          </app-empty-state>
+
+          <!-- Grid -->
+          <div *ngIf="!loadingCompanies && !loadingSearch && (searchResults?.companies || filteredCompanies) && (searchResults?.companies || filteredCompanies)!.length > 0" 
+               class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <app-company-card 
+              *ngFor="let company of (searchResults?.companies || filteredCompanies); let i = index"
+              [company]="company"
+              (viewProducts)="selectCompany(company)"
+              [appTrackClick]="'Company Card Click'"
+              [trackCategory]="'Catalog'"
+              [trackLabel]="company.company_name"
+              class="animate-slide-up"
+              [style.animation-delay]="(i * 50) + 'ms'">
+            </app-company-card>
+          </div>
+          
+          <!-- Pagination -->
+          <div *ngIf="totalPages > 1 && !loadingCompanies && !loadingSearch" 
+               class="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-gray-200 pt-6">
+            <div class="text-sm text-gray-500">
+              Página <span class="font-medium text-gray-900">{{ currentPage }}</span> de <span class="font-medium text-gray-900">{{ totalPages }}</span>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button 
+                (click)="previousPage()" 
+                [disabled]="currentPage === 1"
+                class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              
+              <div class="flex items-center gap-1">
+                <button *ngFor="let page of getPageNumbers()"
+                        (click)="goToPage(page)"
+                        [class.bg-primary]="page === currentPage"
+                        [class.text-white]="page === currentPage"
+                        [class.border-primary]="page === currentPage"
+                        [class.bg-white]="page !== currentPage"
+                        [class.text-gray-700]="page !== currentPage"
+                        class="w-10 h-10 rounded-lg border border-gray-300 font-medium transition-all hover:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                  {{ page }}
+                </button>
+              </div>
+
+              <button 
+                (click)="nextPage()" 
+                [disabled]="currentPage === totalPages"
+                class="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Products Section -->
+        <section *ngIf="searchResults && searchResults.products.length > 0" class="animate-fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-display font-bold text-gray-900 flex items-center gap-2">
+              Produtos Encontrados
+              <span class="text-sm font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                {{ searchResults.products.length }}
+              </span>
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <app-product-card 
+              *ngFor="let product of searchResults.products; let i = index"
+              [product]="convertProductToCardData(product)"
+              [accountId]="getCurrentAccountId() || undefined"
+              (addToCart)="onProductAddToCart($event)"
+              (viewDetails)="goToProductDetails($event)"
+              class="animate-slide-up"
+              [style.animation-delay]="(i * 50) + 'ms'">
+            </app-product-card>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Mobile Filters Drawer -->
+    <app-catalog-filters
+      [isMobile]="true"
+      [showDrawer]="showFiltersDrawer"
+      (filtersChange)="onFiltersChange($event)"
+      (drawerClose)="showFiltersDrawer = false">
+    </app-catalog-filters>
+
+  </main>
+</div>
